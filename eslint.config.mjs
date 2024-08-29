@@ -1,5 +1,4 @@
 import antfu from '@antfu/eslint-config'
-import js from '@eslint/js'
 import globals from 'globals'
 
 export default antfu(
@@ -10,16 +9,17 @@ export default antfu(
     },
   },
   {
-    files: ['**/*.js', '**/*.mjs'],
+    files: ['**/*.js', '**/*.mjs', '**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.browser,
       },
     },
     rules: {
-      ...js.configs.recommended.rules,
       'prefer-const': 'error',
       'no-undef': 'off',
+      'no-console': 'off',
+      'node/prefer-global/process': 'off',
     },
   },
   {
