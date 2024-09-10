@@ -1,36 +1,47 @@
+import type { Server } from 'node:http'
 import type { Request, Response } from 'express'
 import express from 'express'
-import type { IAbstractTransport } from '../abstract-transport'
+import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
-export class ExpressTransport implements IAbstractTransport {
-  constructor(readonly port: number, readonly mediator: Mediator) {}
+export type ExpressContextProperties = {
+  server: Server
+}
 
-  run(): void {
-    const server = express()
-    const { targetMethod: method, targetPath: path, run: fn, extractPayload } = this.mediator
+export class ExpressTransport<T extends ExpressContextProperties> extends AbstractTransport<T> {
+  private port: number
 
-    if (method === 'GET') {
-      server.get(path, async (_req: Request, res: Response) => {
-        const response = await fn()
-        res.send(response)
-      })
-    }
-    else if (method === 'POST') {
-      server.use(express.json())
+  constructor(port: number, mediator: Mediator<T>) {
+    super(mediator)
+    this.port = port
+  }
 
-      server.post(path, async (req: Request, res: Response) => {
-        const payload = extractPayload!(req)
-        const response = await fn(payload)
-        res.send(response)
-      })
-    }
-    else {
-      throw new Error('Endpoint not found')
-    }
+  async run(): Promise<void> {
+    const app = express()
 
-    server.listen(this.port, () => {
-      console.log(`Node.js server running on http://localhost:${this.port}`)
+    this.mediator.context = this.mediator.targetMethod === 'POST'
+      ? await this.initBeforeServer([() => app.use(express.json())])
+      : await this.initBeforeServer()
+
+    // @ts-expect-error impossible to describe types
+    app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (req: Request, res: Response) => {
+      const result = await this.mediator.handleRequest(req.method === 'POST' && (req.body))
+
+      res.send(result)
+    })
+
+    this.mediator.context.server = app.listen(this.port, () => {
+      console.log(`Express server running on http://localhost:${this.port}`)
+    })
+
+    this.gracefulShutdown({
+      closeServerCallback: () => new Promise<void>((res) => {
+        this.mediator.context.server.close((err) => {
+          if (!err) {
+            res()
+          }
+        })
+      }),
     })
   }
 }

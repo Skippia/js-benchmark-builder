@@ -1,16 +1,20 @@
 {
   "name": "benchmark-js-playground",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "author": "",
   "license": "ISC",
   "keywords": [],
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
-    "docker:infra": "docker-compose -f ./src/infra/docker-compose.yaml down && docker-compose -f ./src/infra/docker-compose.yaml up"
+    "docker:infra": "docker-compose -f ./src/infra/docker-compose.yaml down && docker-compose -f ./src/infra/docker-compose.yaml up",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "build": "rm -rf dist && npx tsc --noEmit false && tsc-alias",
+    "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")"
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -27,6 +31,7 @@
     "autocannon": "^7.15.0",
     "eslint": "^9.9.1",
     "globals": "^15.9.0",
+    "tsc-alias": "^1.8.10",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   }

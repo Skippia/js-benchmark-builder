@@ -1,25 +1,25 @@
-import type { Context, Hooks } from './types'
+import type { Context, Hooks, MediatorProperties, TTransportType } from './types'
 
-/* eslint-disable ts/no-unsafe-function-type */
-export class Mediator {
+export class Mediator<T extends Record<string, unknown>> implements MediatorProperties {
+  transportType: TTransportType
   targetMethod: 'GET' | 'POST'
   targetPath: string
   run: Function
   hooks: Hooks
-  context: Context
+  context: Context<T>
 
-  private constructor(
-    { method, path, run, hooks }:
-    { method: 'GET' | 'POST', path: string, run: Function, hooks: Hooks },
+  constructor(
+    mediatorProperties: MediatorProperties,
   ) {
-    this.targetMethod = method
-    this.targetPath = path
-    this.run = run
-    this.hooks = hooks
-    this.context = {}
+    this.transportType = mediatorProperties.transportType
+    this.targetMethod = mediatorProperties.targetMethod
+    this.targetPath = mediatorProperties.targetPath
+    this.run = mediatorProperties.run
+    this.hooks = mediatorProperties.hooks
+    this.context = {} as T
   }
 
-  async runHook(hookName: keyof Hooks, callbacks?: [Function]): Promise<void | Context> {
+  async runHook(hookName: keyof Hooks, callbacks?: Function[]): Promise<void | Context<T>> {
     const hook = this.hooks[hookName]
 
     if (hook) {
@@ -30,27 +30,15 @@ export class Mediator {
     }
   }
 
-  static initialize(
-    { method, path, hooks, run }:
-     { method: 'GET' | 'POST', path: string, hooks: Hooks, run: Function },
-  ) {
-    return new Mediator({ method, path, run, hooks })
-  }
-
   async handleRequest(
-    path: string,
-    method: string,
     payload: false | unknown,
   ): Promise<unknown> {
-    if (this.targetMethod === method && this.targetPath === path) {
-      await this.runHook('onRequest')
+    // await this.runHook('onRequest')
 
-      const result = this.run(payload, this.context)
+    const result = this.run(payload, this.context)
 
-      await this.runHook('onFinish')
+    // await this.runHook('onFinish')
 
-      return result
-    }
-    throw new Error('Endpoint not found')
+    return result
   }
 }

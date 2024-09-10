@@ -20,9 +20,17 @@ export default antfu(
       'no-undef': 'off',
       'no-console': 'off',
       'node/prefer-global/process': 'off',
+      '@typescript-eslint/consistent-type-definitions': [
+        'error',
+        'type',
+      ],
+      '@typescript-eslint/no-unsafe-function-type': [
+        'off',
+      ],
+      'ts/no-empty-object-type': ['off'],
     },
   },
   {
-    ignores: ['node_modules/*', 'dist/*'],
+    ignores: ['node_modules/*', 'dist/*', 'tsconfig.json'],
   },
 )

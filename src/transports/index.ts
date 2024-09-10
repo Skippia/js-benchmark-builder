@@ -1,2 +1,2 @@
-export * from './transport-factory'
+export * from './build-transport'
 export * from './types'
