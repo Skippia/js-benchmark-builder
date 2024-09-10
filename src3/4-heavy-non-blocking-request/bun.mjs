@@ -5,10 +5,10 @@ import { heavyNonBlockingTask } from '../shared/index.mjs'
 export function run(port) {
   serve({
     port,
-    fetch(req) {
+    async fetch(req) {
       const url = new URL(req.url)
       if (url.pathname === '/heavy-non-blocking' && req.method === 'GET') {
-        return new Response(JSON.stringify(heavyNonBlockingTask()), {
+        return new Response(JSON.stringify(await heavyNonBlockingTask()), {
           headers: {
             'Content-Type': 'application/json',
           },

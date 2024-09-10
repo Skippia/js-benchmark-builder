@@ -8,8 +8,8 @@ if (!(await getUser(pgPoolClient))) {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/user') {
-    const user = await getUser(pgPoolClient)
+  if (req.method === 'GET' && req.url === '/pg-pool-get-user') {
+    const user = await getUser(pgPoolClient)()
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(user))

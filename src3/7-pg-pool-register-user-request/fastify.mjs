@@ -4,10 +4,10 @@ import { createUser, pgPoolClient } from '../infra/pg.mjs'
 const PORT = process.env.PORT
 const fastify = Fastify({ logger: false })
 
-fastify.post('/user', async (request, reply) => {
+fastify.post('/pg-pool-create-user', async (request, reply) => {
   try {
-    const { email, password } = request.body
-    const userId = await createUser(pgPoolClient)(email, password)
+    const body = request.body
+    const userId = await createUser(pgPoolClient)({ email: body.email, password: body.password })
 
     reply
       .code(201)

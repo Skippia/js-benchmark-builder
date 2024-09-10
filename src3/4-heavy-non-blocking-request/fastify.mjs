@@ -8,7 +8,7 @@ export function run(port) {
   fastify.get('/heavy-non-blocking', async (request, reply) => {
     reply
       .header('Content-Type', 'application/json')
-      .send(heavyNonBlockingTask())
+      .send(await heavyNonBlockingTask())
   })
 
   fastify.listen({ port }, (err, address) => {

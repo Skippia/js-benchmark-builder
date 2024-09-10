@@ -6,10 +6,10 @@ const app = express()
 
 app.use(express.json())
 
-app.post('/user', async (req, res) => {
+app.post('/pg-pool-create-user', async (req, res) => {
   try {
-    const { email, password } = req.body
-    const userId = await createUser(pgPoolClient)(email, password)
+    const body = req.body
+    const userId = await createUser(pgPoolClient)({ email: body.email, password: body.password })
 
     res.status(201).json({ message: 'User created', userId })
   }

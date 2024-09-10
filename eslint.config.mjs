@@ -28,6 +28,7 @@ export default antfu(
         'off',
       ],
       'ts/no-empty-object-type': ['off'],
+      'no-unused-vars': ['off'],
     },
   },
   {

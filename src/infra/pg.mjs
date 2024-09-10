@@ -7,7 +7,7 @@ function initPgPool() {
     password: process.env.POSTGRES_PASSWORD,
     port: 5432,
     database: process.env.POSTGRES_DB,
-    max: 200,
+    max: 500,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5000,
     ssl: false,

@@ -8,12 +8,12 @@ if (!(await getUser(pgPoolClient))) {
   await createUser(pgPoolClient)({ email: 'randomuser@gmail.com', password: 'hello123' })
 }
 
-app.get('/user', async (res) => {
+app.get('/pg-pool-get-user', async (res) => {
   res.onAborted(() => {
     res.aborted = true
   })
 
-  const user = await getUser(pgPoolClient)
+  const user = await getUser(pgPoolClient)()
 
   if (!res.aborted) {
     res.cork(() => {

@@ -22,17 +22,43 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
 
     // @ts-expect-error impossible to describe types
     app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (res: HttpResponse, _req: HttpRequest) => {
-      const result = await this.mediator.handleRequest(
-        this.mediator.targetMethod === 'POST' && await this.readJson(res, () => {
-          console.log('Invalid JSON or no data at all!')
-        }),
-      )
+      let aborted = false
 
-      res.cork(() => {
-        res.writeHeader('content-type', 'application/json').end(
-          JSON.stringify(result),
-        )
+      res.onAborted(() => {
+        aborted = true // Track if the request has been aborted
       })
+
+      const handleRequest = async (body: unknown | false,
+      ) => {
+        this.mediator.handleRequest(body).then((result) => {
+          if (!aborted) {
+            res.cork(() => {
+              res.writeHeader('content-type', 'application/json').end(
+                JSON.stringify(result),
+              )
+            })
+          }
+        }).catch((err) => {
+          console.error(err)
+
+          if (!aborted) {
+            res.cork(() => {
+              res.writeStatus('500 Internal Server Error').end(JSON.stringify({ error: err.message }))
+            })
+          }
+        })
+      }
+
+      const methodHandlers: { [key: string]: () => void } = {
+        POST: () => {
+          this.readJson(res, handleRequest, () => console.log('Invalid JSON or no data at all!'))
+        },
+        default: () => {
+          handleRequest(false)
+        },
+      }
+
+      return ((methodHandlers[this.mediator.targetMethod] || methodHandlers.default) as Function)()
     })
 
     this.mediator.context.server = app.listen(this.port, (token) => {
@@ -50,52 +76,60 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
   }
 
   /* Helper function for reading a posted JSON body */
-  async readJson(res: HttpResponse, err: () => void): Promise<unknown> {
-    return new Promise((resolve) => {
-      let buffer: Buffer
-      /* Register data cb */
-      res.onData((ab: ArrayBuffer, isLast: boolean) => {
-        const chunk = Buffer.from(ab)
+  async readJson(res: HttpResponse, cb: (body: unknown) => void, err: () => void) {
+    let aborted = false
+    let buffer: Buffer
 
-        if (isLast) {
-          let json
-          if (buffer) {
-            try {
+    /* Register onAborted callback */
+    res.onAborted(() => {
+      aborted = true // Mark as aborted
+      err() // Call the error handler
+    })
+
+    /* Register data cb */
+    res.onData((ab, isLast) => {
+      if (aborted)
+        return
+
+      const chunk = Buffer.from(ab)
+      if (isLast) {
+        let json: unknown
+        if (buffer) {
+          try {
             // @ts-expect-error ...
-              json = JSON.parse(Buffer.concat([buffer, chunk]))
-            }
-            catch {
-            /* res.close calls onAborted */
-              res.close()
-              return
-            }
-            resolve(json)
+            json = JSON.parse(Buffer.concat([buffer, chunk]))
           }
-          else {
-            try {
-            // @ts-expect-error ...
-              json = JSON.parse(chunk)
-            }
-            catch {
+          catch {
             /* res.close calls onAborted */
-              res.close()
-              return
+            if (!aborted) {
+              res.close() // If JSON parsing fails, close the response
             }
-            resolve(json)
+            return
           }
+          cb(json)
         }
         else {
-          if (buffer) {
-            buffer = Buffer.concat([buffer, chunk])
+          try {
+            // @ts-expect-error ...
+            json = JSON.parse(chunk)
           }
-          else {
-            buffer = Buffer.concat([chunk])
+          catch {
+            if (!aborted) {
+              res.close() // If JSON parsing fails, close the response
+            }
+            return
           }
+          cb(json)
         }
-      })
-
-      /* Register error cb */
-      res.onAborted(err)
+      }
+      else {
+        if (buffer) {
+          buffer = Buffer.concat([buffer, chunk])
+        }
+        else {
+          buffer = Buffer.concat([chunk])
+        }
+      }
     })
   }
 }

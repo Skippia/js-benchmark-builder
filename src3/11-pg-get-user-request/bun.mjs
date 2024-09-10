@@ -11,8 +11,8 @@ serve({
   port,
   async fetch(req) {
     const url = new URL(req.url)
-    if (url.pathname === '/user' && req.method === 'GET') {
-      const user = await getUser(pgPoolClient)
+    if (url.pathname === '/pg-pool-get-user' && req.method === 'GET') {
+      const user = await getUser(pgPoolClient)()
 
       return new Response(JSON.stringify(user), {
         headers: {

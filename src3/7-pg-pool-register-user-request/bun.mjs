@@ -8,10 +8,10 @@ serve({
   async fetch(req) {
     const url = new URL(req.url)
 
-    if (req.method === 'POST' && url.pathname === '/user') {
+    if (req.method === 'POST' && url.pathname === '/pg-pool-create-user') {
       try {
         const { email, password } = await req.json()
-        const userId = await createUser(pgPoolClient)(email, password)
+        const userId = await createUser(pgPoolClient)({ email, password })
 
         return new Response(JSON.stringify({ message: 'User created', userId }), {
           status: 201,

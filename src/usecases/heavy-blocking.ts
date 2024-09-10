@@ -1,5 +1,15 @@
 import type { Context, Hooks } from '../transports'
 
+function heavyBlockingTask() {
+  let sum = 0
+
+  for (let i = 0; i < 1e8; i++) {
+    sum += i
+  }
+
+  return sum
+}
+
 export const hooks: Hooks = {
   async onInit(callbacks?: Function[]): Promise<Context> {
     const context = {}
@@ -26,5 +36,5 @@ export async function run(
   _payload: unknown,
   _context: Context,
 ): Promise<unknown> {
-  return 'Empty data'
+  return heavyBlockingTask()
 }

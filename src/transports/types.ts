@@ -1,7 +1,7 @@
-export type TTransportType = 'node' | 'express' | 'fastify' | 'bun' | 'ws'
-export type TUsecaseType
+export type TTransportTypeUnion = 'node' | 'express' | 'fastify' | 'bun' | 'ws'
+export type TUsecaseTypeUnion
   = 'empty' | 'json-parse' | 'heavy-blocking' | 'heavy-non-blocking'
-  | 'pg-pool-register' | 'cluster-json-parse' | 'cluster-heavy-blocking'
+  | 'pg-pool-create-user' | 'cluster-json-parse' | 'cluster-heavy-blocking'
   | 'pg-get-user' | 'redis-get-user'
 
 export type Context<T extends Record<string, unknown> = {}> = {
@@ -16,7 +16,7 @@ export type Hooks = {
 }
 
 export type MediatorProperties = {
-  transportType: TTransportType
+  transportType: TTransportTypeUnion
   targetMethod: 'GET' | 'POST'
   targetPath: string
   hooks: Hooks

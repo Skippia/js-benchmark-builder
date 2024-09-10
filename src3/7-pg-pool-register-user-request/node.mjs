@@ -27,12 +27,10 @@ const server = http.createServer(async (req, res) => {
     'Content-Type': 'application/json',
   }
 
-  if (req.method === 'POST' && req.url === '/user') {
+  if (req.method === 'POST' && req.url === '/pg-pool-create-user') {
     try {
-      console.log('a')
       const body = await getRequestBody(req)
-      const { email, password } = body
-      const userId = await createUser(pgPoolClient)(email, password)
+      const userId = await createUser(pgPoolClient)({ email: body.email, password: body.password })
 
       const responseBody = JSON.stringify({ message: 'User created', userId })
       sendResponse(res, 201, headers, responseBody)

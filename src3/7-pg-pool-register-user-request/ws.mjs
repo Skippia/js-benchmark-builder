@@ -6,11 +6,11 @@ const PORT = +process.env.PORT
 const app = App()
 
 app
-  .post('/user', (res) => {
+  .post('/pg-pool-create-user', (res) => {
     readJson(
       res,
       (body) => {
-        createUser(pgPoolClient)(body.email, body.password).then((userId) => {
+        createUser(pgPoolClient)({ email: body.email, password: body.password }).then((userId) => {
           res.cork(() => {
             res.writeHeader('content-type', 'application/json').end(
               JSON.stringify({ message: 'User created', userId }),

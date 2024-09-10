@@ -27,7 +27,7 @@ export class ExpressTransport<T extends ExpressContextProperties> extends Abstra
     app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (req: Request, res: Response) => {
       const result = await this.mediator.handleRequest(req.method === 'POST' && (req.body))
 
-      res.send(result)
+      res.json(result)
     })
 
     this.mediator.context.server = app.listen(this.port, () => {

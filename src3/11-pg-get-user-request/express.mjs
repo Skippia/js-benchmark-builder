@@ -8,9 +8,9 @@ if (!(await getUser(pgPoolClient))) {
   await createUser(pgPoolClient)({ email: 'randomuser@gmail.com', password: 'hello123' })
 }
 
-app.get('/user', async (req, res) => {
+app.get('/pg-pool-get-user', async (req, res) => {
   try {
-    const user = await getUser(pgPoolClient)
+    const user = await getUser(pgPoolClient)()
 
     res.status(201).json({ user })
   }

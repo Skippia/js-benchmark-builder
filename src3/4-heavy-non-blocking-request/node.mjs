@@ -3,10 +3,10 @@ import http from 'node:http'
 import { heavyNonBlockingTask } from '../shared/index.mjs'
 
 export function run(port) {
-  const server = http.createServer((req, res) => {
+  const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/heavy-non-blocking') {
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify(heavyNonBlockingTask()))
+      res.end(JSON.stringify(await heavyNonBlockingTask()))
     }
   })
 
