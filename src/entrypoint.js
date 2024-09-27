@@ -9,14 +9,14 @@ const cpuAmount = process.argv[4] === 'max'
     ? 1
     : Number(process.argv[4])
 
-const hostEnvironment = transportType === 'bun' ? 'bun' : 'npx tsx'
+const hostEnvironment = transportType === 'bun' ? 'bun' : 'node'
 
 if (!transportType || !usecaseType) {
   console.error('You have specified transport type or usecase type!')
 }
 else {
   const script = exec(
-    `NODE_ENV=production ${hostEnvironment} --env-file=.env ./src/main.ts ${transportType} ${usecaseType} ${cpuAmount}`,
+    `NODE_ENV=production ${hostEnvironment} --env-file=.env ./dist/src/main.js ${transportType} ${usecaseType} ${cpuAmount}`,
     (error, stdout, stderr) => {
       if (error) {
         console.error(`Error: ${error.message}`)

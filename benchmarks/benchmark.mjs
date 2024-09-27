@@ -60,7 +60,6 @@ import autocannon from 'autocannon'
 import { usecaseMap } from '../src/usecases/usecase-map.js'
 
 const require = createRequire(import.meta.url)
-const usersData = require('./users.json')
 
 const PORT = process.env.PORT
 const usecaseType = process.argv[2]
@@ -78,7 +77,7 @@ if (!usecaseConfig) {
 let requests = []
 
 if (usecaseConfig.method === 'POST') {
-  requests = usersData.map(user => ({
+  requests = require('./users.json').map(user => ({
     method: 'POST',
     path: usecaseConfig.path,
     body: JSON.stringify(user),

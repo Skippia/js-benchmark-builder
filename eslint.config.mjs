@@ -32,6 +32,6 @@ export default antfu(
     },
   },
   {
-    ignores: ['node_modules/*', 'dist/*', 'tsconfig.json'],
+    ignores: ['node_modules/*', 'tsconfig.json'],
   },
 )
