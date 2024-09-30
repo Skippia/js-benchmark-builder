@@ -39,8 +39,6 @@ export class BunTransport<T extends BunContextProperties> extends AbstractTransp
 
     console.log(`Bun server running on http://localhost:${this.port}`)
 
-    this.gracefulShutdown({
-      closeServerCallback: () => this.mediator.context.server.stop(),
-    })
+    this.gracefulShutdown(() => this.mediator.context.server.stop())
   }
 }

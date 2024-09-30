@@ -32,13 +32,14 @@ function startEntrypoint({
       usecase,
       '-cores',
       String(realCores),
-    ])
+    ], {
+      detached: true,
+    })
 
     childServerProcess.stdout.on('data', (data) => {
       const stdoutInfo = data?.toString()
 
-      /* if (!stdoutInfo.startsWith('[Hook]'))  */
-      console.log(stdoutInfo)
+      if (!stdoutInfo.startsWith('[Hook]')) console.log(stdoutInfo)
 
       if (stdoutInfo.includes('server running on')) {
         // Server is ready to accept requests
@@ -46,12 +47,16 @@ function startEntrypoint({
       }
     })
 
-    // serverProcess.stderr.on('data', (data) => {
-    //   console.log(`stderr`, data?.toString())
-    // })
+    childServerProcess.stderr.on('data', (data) => {
+      console.log(`stderr`, data?.toString())
+    })
 
     process.on('SIGINT', () => {
-      console.log('[Parent]: intercept SIGINT')
+      process.kill(childServerProcess.pid!, 'SIGINT')
+
+      childServerProcess.on('close', () => {
+        process.exit(0)
+      })
     })
   })
 }

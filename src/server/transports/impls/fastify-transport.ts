@@ -55,8 +55,7 @@ export class FastifyTransport<T extends FastifyContextProperties> extends Abstra
       console.log(`Fastify server running on http://localhost:${this.port}`)
     })
 
-    this.gracefulShutdown({
-      closeServerCallback: () => this.mediator.context.server.close(),
-    })
+    this.gracefulShutdown(() => this.mediator.context.server.close(),
+    )
   }
 }

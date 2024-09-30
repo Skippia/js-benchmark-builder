@@ -41,15 +41,13 @@ export class NodeTransport<T extends NodeContextProperties> extends AbstractTran
       console.log(`Node server running on http://localhost:${this.port}`)
     })
 
-    this.gracefulShutdown({
-      closeServerCallback: () => new Promise<void>((res) => {
-        this.mediator.context.server.close((err) => {
-          if (!err) {
-            res()
-          }
-        })
-      }),
-    })
+    this.gracefulShutdown(() => new Promise<void>((resolve) => {
+      this.mediator.context.server.close((err) => {
+        if (!err) {
+          resolve()
+        }
+      })
+    }))
   }
 
   getRequestBody(req: IncomingMessage) {

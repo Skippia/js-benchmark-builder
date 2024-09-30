@@ -22,38 +22,29 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
    * f.e close sockets, connections etc.
    * After it HTTP server will be stopped.
    */
-  gracefulShutdown({ closeServerCallback }: { closeServerCallback: () => Promise<void> | void }, callbacks?: Function[]) {
+  gracefulShutdown(closeServerCallback: () => Promise<void> | void, callbacks?: Function[]) {
     console.log('[Hook]:', 'Configurate graceful shutdown...')
 
     process.on('SIGINT', async () => {
       // ('ctrl + c')
-      console.log('[Child]: intercept SIGINT')
-
-      // console.log('!Graceful shutdown intercepts SIGTERM signal!')
-
-      // this.mediator.runHook('onClose')
-      // callbacks?.forEach(c => c())
-      // await closeServerCallback()
-
-      // process.exitCode = 0
-    })
-
-    process.on('SIGTERM', async () => {
-      console.log('!Graceful shutdown intercepts SIGTERM signal!')
+      console.log('[Hook][Child]: intercept SIGINT')
 
       this.mediator.runHook('onClose')
       callbacks?.forEach(c => c())
       await closeServerCallback()
 
-      // process.exitCode = 1
+      console.log('[Hook][Child]: terminate process with code', 0)
+      process.exit(0)
     })
 
-    process.on('error', (err) => {
-      console.error('Error in child process:', err)
-    })
+    process.on('SIGTERM', async () => {
+      console.log('[Hook][Child]: intercept SIGTERM')
 
-    process.on('uncaughtException', (err) => {
-      console.error('Uncaught exception in child process:', err)
+      this.mediator.runHook('onClose')
+      callbacks?.forEach(c => c())
+      await closeServerCallback()
+
+      console.log('[Hook][Child]: terminate process with code', 1)
     })
   }
 }

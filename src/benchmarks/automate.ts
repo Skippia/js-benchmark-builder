@@ -76,8 +76,6 @@ start(
       connections: 100,
       pipelining: 1,
     },
-    operations: buildOperations(usecases, transports, [1]),
+    operations: buildOperations(usecases, transports, [2]),
   },
 )
-
-// console.log(buildOperations(usecases, transports, ['max']))

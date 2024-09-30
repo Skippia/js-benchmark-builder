@@ -62,9 +62,10 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
       }
     })
 
-    this.gracefulShutdown({
-      closeServerCallback: () => { this.mediator.context.server.close() },
-    })
+    this.gracefulShutdown(() => {
+      this.mediator.context.server.close()
+    },
+    )
   }
 
   async readJson(res: HttpResponse): Promise<unknown> {

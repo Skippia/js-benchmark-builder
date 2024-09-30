@@ -40,14 +40,14 @@ export class ExpressTransport<T extends ExpressContextProperties> extends Abstra
       console.log(`Express server running on http://localhost:${this.port}`)
     })
 
-    this.gracefulShutdown({
-      closeServerCallback: () => new Promise<void>((res) => {
+    this.gracefulShutdown(
+      () => new Promise<void>((res) => {
         this.mediator.context.server.close((err) => {
           if (!err) {
             res()
           }
         })
       }),
-    })
+    )
   }
 }
