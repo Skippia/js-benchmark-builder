@@ -1,34 +1,37 @@
 import cluster from 'node:cluster'
+import { getFlagValue } from '../benchmarks/utils'
 import { type TTransportTypeUnion, type TUsecaseTypeUnion, buildTransport } from './transports'
 
-const transportType = process.argv[2] as TTransportTypeUnion
-const usecaseType = process.argv[3] as TUsecaseTypeUnion
-const cpuAmount = Number(process.argv[4] as string)
+const [transport, usecase, cores] = [
+  getFlagValue('t') as TTransportTypeUnion,
+  getFlagValue('u') as TUsecaseTypeUnion,
+  +getFlagValue('cores')! as number,
+]
 
 export async function buildServer(
-  { transportType, usecaseType, cpuAmount }:
-  { transportType: TTransportTypeUnion, usecaseType: TUsecaseTypeUnion, cpuAmount: number },
+  { transport, usecase, cores }:
+  { transport: TTransportTypeUnion, usecase: TUsecaseTypeUnion, cores: number },
 ) {
   const port = Number(process.env.PORT || 3001)
 
-  const transport = await buildTransport(
-    { transportType, usecaseType, port },
+  const framework = await buildTransport(
+    { transport, usecase, port },
   )
 
   if (cluster.isPrimary) {
-    console.log(`Server will be run on ${cpuAmount} logical cores`)
+    console.log(`Server will be run on ${cores} logical cores`)
 
-    for (let i = 0; i < cpuAmount; i++) {
+    for (let i = 0; i < cores; i++) {
       cluster.fork()
     }
 
-    cluster.on('exit', (worker) => {
-      console.log(`Process ${worker.process.pid} died`)
-    })
+    // cluster.on('exit', (worker) => {
+    //   console.log(`Process ${worker.process.pid} died`)
+    // })
   }
   else {
-    transport.run()
+    framework.run()
   }
 }
 
-buildServer({ transportType, usecaseType, cpuAmount })
+buildServer({ transport, usecase, cores })

@@ -3,7 +3,7 @@ import path from 'node:path'
 import autocannon from 'autocannon'
 import { usecaseMap } from '../server/usecases/usecase-map.js'
 import type { TUsecaseTypeUnion } from '../server/transports/types.js'
-import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark, TUsecaseConfig } from './utils/index'
+import { type TBenchmarkSettingsCLI, type TBenchmarkSettingsProgrammatically, type TResultBenchmark, type TUsecaseConfig, getFlagValue } from './utils/index'
 
 const require = createRequire(import.meta.url)
 
@@ -84,15 +84,12 @@ function startBench(
   })
 }
 
-// Run from CLI
-if (process.argv[2]) {
-  const usecase = process.argv[2] as TUsecaseTypeUnion
-  /**
-   * method: 'GET' | 'POST',
-   * path: '/some-path',
-   */
-  // @ts-expect-error ...
-  const usecaseConfig: TUsecaseConfig = usecaseMap[usecase]
+// Run from CLI is forbidden in automate mode
+const isAutomateMode = getFlagValue('-automate')
+
+if (!isAutomateMode) {
+  const usecase = getFlagValue('u') as TUsecaseTypeUnion
+  const usecaseConfig = usecaseMap[usecase]!
 
   if (!usecaseConfig) {
     throw new Error('Usecase not found!')

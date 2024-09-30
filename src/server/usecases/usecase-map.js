@@ -30,3 +30,5 @@ export const usecaseMap = {
     path: '/redis-get-user',
   },
 }
+
+export const usecases = Object.keys(usecaseMap)

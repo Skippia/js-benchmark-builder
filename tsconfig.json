@@ -119,6 +119,8 @@
   ],
   "exclude": [
     "node_modules",
-    "eslint.config.mjs"
+    "src3",
+    "eslint.config.mjs",
+    "dist"
   ]
 }

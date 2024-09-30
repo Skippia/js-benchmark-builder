@@ -1,4 +1,3 @@
-import process from 'node:process'
 import type { Mediator } from './mediator'
 import type { Context } from './types'
 
@@ -14,7 +13,7 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
    */
   async initBeforeServer(callbacks?: Function[]): Promise<Context<T>> {
     return (await this.mediator.runHook('onInit', [() => {
-      console.log(`[${this.mediator.transportType}] expects [${this.mediator.targetMethod}]: ${this.mediator.targetPath}`)
+      console.log(`[${this.mediator.transport}] expects [${this.mediator.targetMethod}]: ${this.mediator.targetPath}`)
     }, ...(callbacks || [])])) as Context<T>
   }
 
@@ -28,23 +27,33 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
 
     process.on('SIGINT', async () => {
       // ('ctrl + c')
-      console.log('Graceful shutdown intercepts SIGINT signal')
+      console.log('[Child]: intercept SIGINT')
 
-      this.mediator.runHook('onClose')
-      callbacks?.forEach(c => c())
-      await closeServerCallback()
+      // console.log('!Graceful shutdown intercepts SIGTERM signal!')
 
-      process.exit(0)
+      // this.mediator.runHook('onClose')
+      // callbacks?.forEach(c => c())
+      // await closeServerCallback()
+
+      // process.exitCode = 0
     })
 
     process.on('SIGTERM', async () => {
-      console.log('[Hook]:', 'Graceful shutdown intercepts SIGTERM signal')
+      console.log('!Graceful shutdown intercepts SIGTERM signal!')
 
       this.mediator.runHook('onClose')
       callbacks?.forEach(c => c())
       await closeServerCallback()
 
-      process.exit(1)
+      // process.exitCode = 1
+    })
+
+    process.on('error', (err) => {
+      console.error('Error in child process:', err)
+    })
+
+    process.on('uncaughtException', (err) => {
+      console.error('Uncaught exception in child process:', err)
     })
   }
 }

@@ -3,7 +3,6 @@ import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/transp
 type second = number
 
 type TDefaultSettings = {
-  core: number
   delayBeforeRunning?: second
   connections: number
   pipelining: number
@@ -11,9 +10,9 @@ type TDefaultSettings = {
   duration: second
 }
 
-type TUsecaseConfig = { method: 'GET' | 'POST', path: string }
+type TUsecaseConfig<T extends string = string> = { method: 'GET' | 'POST', path: `/${T}` }
 
-type TBenchmarkSettingsCLI = Omit<TDefaultSettings, 'core' | 'delayBeforeRunning'>
+type TBenchmarkSettingsCLI = Omit<TDefaultSettings, 'cores' | 'delayBeforeRunning'>
   & { usecaseConfig: TUsecaseConfig } & Partial<Pick<TResultBenchmark, 'transport' | 'usecase'>>
 
 type TBenchmarkSettingsProgrammatically = TBenchmarkSettingsCLI & Pick<TResultBenchmark, 'transport' | 'usecase'>
@@ -46,6 +45,7 @@ type TResultBenchmark = {
 type TRuntimeSettings = {
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
+  cores: number | 'max' | string | undefined
 }
 
 type TSnapshotOnDisk = {

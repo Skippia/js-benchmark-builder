@@ -1,7 +1,7 @@
 import type { Context, Hooks, MediatorProperties, TTransportTypeUnion } from './types'
 
 export class Mediator<T extends Record<string, unknown>> implements MediatorProperties {
-  transportType: TTransportTypeUnion
+  transport: TTransportTypeUnion
   targetMethod: 'GET' | 'POST'
   targetPath: string
   run: Function
@@ -11,7 +11,7 @@ export class Mediator<T extends Record<string, unknown>> implements MediatorProp
   constructor(
     mediatorProperties: MediatorProperties,
   ) {
-    this.transportType = mediatorProperties.transportType
+    this.transport = mediatorProperties.transport
     this.targetMethod = mediatorProperties.targetMethod
     this.targetPath = mediatorProperties.targetPath
     this.run = mediatorProperties.run

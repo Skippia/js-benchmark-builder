@@ -16,7 +16,7 @@ export type Hooks = {
 }
 
 export type MediatorProperties = {
-  transportType: TTransportTypeUnion
+  transport: TTransportTypeUnion
   targetMethod: 'GET' | 'POST'
   targetPath: string
   hooks: Hooks

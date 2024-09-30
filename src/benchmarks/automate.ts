@@ -1,14 +1,11 @@
 /* eslint-disable no-async-promise-executor */
 import type { spawn } from 'node:child_process'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../server/transports'
-import { usecaseMap } from '../server/usecases/usecase-map'
+import { transports } from '../server/transports'
+import { usecaseMap, usecases } from '../server/usecases/usecase-map.js'
 import { startEntrypoint } from '../server/entrypoint'
-import { buildOperations, logAfterBenchmark, logBeforeBenchmark, prepareToBenchmarkFileOnDisk, sleep, updateBenchmarkInfo } from './utils'
+import { buildOperations, logAfterBenchmark, logBeforeBenchmark, logCompleteBenchmark, prepareToBenchmarkFileOnDisk, sleep, updateBenchmarkInfo } from './utils'
 import type { TDefaultSettings, TRuntimeSettings } from './utils'
 import { startBench } from './benchmark.js'
-
-const transports: TTransportTypeUnion[] = ['node', 'bun', 'express', 'fastify', 'ws']
-const usecases: TUsecaseTypeUnion[] = Object.keys(usecaseMap).slice(0, 3) as TUsecaseTypeUnion[]
 
 const runScript = async (
   defaultSettings: TDefaultSettings,
@@ -17,13 +14,13 @@ const runScript = async (
 ): Promise<void> => {
   return new Promise(async (resolve) => {
     // 1. Run server
-    const readyServerProcess = await startEntrypoint({
-      cpuAmount: defaultSettings.core,
-      transportType: operation.transport,
-      usecaseType: operation.usecase,
+    const childServerProcess = await startEntrypoint({
+      cores: operation.cores,
+      transport: operation.transport,
+      usecase: operation.usecase,
     }) as ReturnType<typeof spawn>
 
-    readyServerProcess.on('close', (_code) => {
+    childServerProcess.on('close', (_code) => {
       // Server process was terminated
       return resolve()
     })
@@ -43,7 +40,7 @@ const runScript = async (
     await updateBenchmarkInfo(pathToStorage, benchmarkResult)
 
     // 4. Stop server
-    process.kill(-readyServerProcess.pid!, 'SIGTERM')
+    process.kill(-childServerProcess.pid!, 'SIGTERM')
   })
 }
 
@@ -59,17 +56,28 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
     // Run benchmark test
     await runScript(defaultSettings, operation, pathToStorage)
 
-    logAfterBenchmark(defaultSettings)
-
     if (i !== (operations.length - 1)) {
+      logAfterBenchmark(defaultSettings)
+
       await sleep(defaultSettings?.delayBeforeRunning || 10)
+    }
+    else {
+      logCompleteBenchmark()
     }
   }
 }
 
 start(
   {
-    defaultSettings: { core: 1, workers: 3, delayBeforeRunning: 10, duration: 600, connections: 100, pipelining: 1 },
-    operations: buildOperations(usecases, transports),
+    defaultSettings: {
+      workers: 3,
+      delayBeforeRunning: 10,
+      duration: 10,
+      connections: 100,
+      pipelining: 1,
+    },
+    operations: buildOperations(usecases, transports, [1]),
   },
 )
+
+// console.log(buildOperations(usecases, transports, ['max']))

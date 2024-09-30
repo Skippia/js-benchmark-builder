@@ -11,19 +11,19 @@ const transportMap: Partial<Record<TTransportTypeUnion, () => Promise<new (port:
   ws: () => import('./impls/ws-transport').then(i => i.WsTransport),
 }
 
-export async function buildTransport(config: { transportType: TTransportTypeUnion, usecaseType: TUsecaseTypeUnion, port: number }): Promise<AbstractTransport> {
-  const { transportType, usecaseType, port } = config
+export async function buildTransport(config: { transport: TTransportTypeUnion, usecase: TUsecaseTypeUnion, port: number }): Promise<AbstractTransport> {
+  const { transport, usecase, port } = config
 
-  const { hooks, run } = (await import(`../usecases/${usecaseType}.js`))
-  const usecaseConfig = usecaseMap[usecaseType]
+  const { hooks, run } = (await import(`../usecases/${usecase}.js`))
+  const usecaseConfig = usecaseMap[usecase]
 
   if (!usecaseConfig) {
     throw new Error('Usecase not found!')
   }
 
-  const TransportImpl = await transportMap[transportType]!()
+  const TransportImpl = await transportMap[transport]!()
   const mediator = new Mediator<any>(
-    { hooks, run, transportType, targetMethod: usecaseConfig.method, targetPath: usecaseConfig.path },
+    { hooks, run, transport, targetMethod: usecaseConfig.method, targetPath: usecaseConfig.path },
   )
 
   return new TransportImpl(

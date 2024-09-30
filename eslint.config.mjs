@@ -28,10 +28,13 @@ export default antfu(
         'off',
       ],
       'ts/no-empty-object-type': ['off'],
+      'unicorn/no-new-array': ['off'],
       'no-unused-vars': ['off'],
+      'antfu/if-newline': ['off'],
+      'antfu/top-level-function': ['off'],
     },
   },
   {
-    ignores: ['node_modules/*', 'tsconfig.json'],
+    ignores: ['node_modules/*', 'tsconfig.json', 'benchmarks-data/*'],
   },
 )
