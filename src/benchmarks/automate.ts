@@ -1,6 +1,7 @@
+/* eslint-disable no-async-promise-executor */
 import { startEntrypoint } from '../server/entrypoint'
 import { usecaseMap } from '../server/misc/types'
-import { configureCascadeMasterGracefulShutdown, runScript } from '../server/misc/helpers'
+import { configureCascadeMasterGracefulShutdown } from '../server/misc/helpers'
 import type { ServerProcessManager } from '../server/misc/server-process-manager'
 import {
   buildOperations,
@@ -14,6 +15,44 @@ import {
 import type { TDefaultSettings, TRuntimeSettings } from './utils'
 import { startBenchmark } from './benchmark'
 import { automateBenchmarkConfig } from './benchmark-config'
+
+export const runScript = async (
+  defaultSettings: TDefaultSettings,
+  operation: TRuntimeSettings,
+  pathToLastSnapshotFile: string,
+  currentChildProcessManagerRef: { value: ServerProcessManager | null },
+): Promise<void> => {
+  return new Promise(async (resolve) => {
+    // 1. Run server & and hold reference to the actual child process
+    currentChildProcessManagerRef.value = await startEntrypoint({
+      cores: operation.cores,
+      transport: operation.transport,
+      usecase: operation.usecase,
+    })
+
+    currentChildProcessManagerRef.value!.on('close', (_code) => {
+      // Server process was terminated
+      return resolve()
+    })
+
+    // 2. Run benchmark & collect data
+    const benchmarkResult = await startBenchmark({
+      connections: defaultSettings.connections,
+      pipelining: defaultSettings.pipelining,
+      workers: defaultSettings.workers,
+      duration: defaultSettings.duration,
+      usecaseConfig: usecaseMap[operation.usecase]!,
+      transport: operation.transport,
+      usecase: operation.usecase,
+    })
+
+    // 3. Save benchmark data on disk
+    await updateBenchmarkInfo(pathToLastSnapshotFile, benchmarkResult)
+
+    // 4. Stop server
+    currentChildProcessManagerRef.value.stop('SIGTERM')
+  })
+}
 
 const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
   /**
