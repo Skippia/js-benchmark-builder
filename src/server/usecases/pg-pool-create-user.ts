@@ -1,5 +1,5 @@
 import { createUser, pgPoolClient } from '../infra/pg.mjs'
-import type { Context, Hooks } from '../transports'
+import type { Context, Hooks } from '../types'
 
 type PgPoolCreateUserContext
   = Context & { createUser: ({ email, password }: { email: string, password: string }) => Promise<string> }

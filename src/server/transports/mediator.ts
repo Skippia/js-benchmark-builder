@@ -1,4 +1,4 @@
-import type { Context, Hooks, MediatorProperties, TTransportTypeUnion } from './types'
+import type { Context, Hooks, MediatorProperties, TTransportTypeUnion } from '../types'
 
 export class Mediator<T extends Record<string, unknown>> implements MediatorProperties {
   transport: TTransportTypeUnion

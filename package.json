@@ -15,7 +15,7 @@
     "docker:clear": "docker volume rm $(docker volume ls -f dangling=true -q) && docker rm -f $(docker ps -a --filter name=^nmt- -q) && docker rmi $(docker images -f dangling=true -q)",
     "-----------------------------------------------": "",
     "server": "NODE_ENV=production node --env-file=.env ./dist/server/entrypoint.js",
-    "benchmark:automate": "NODE_ENV=production node --env-file=.env ./dist/benchmarks/automate.js --automate",
+    "benchmark:automate": "NODE_ENV=production node --env-file=.env ./dist/benchmarks/automate.js -automate",
     "benchmark:manual": "NODE_ENV=production node --env-file=.env ./dist/benchmarks/benchmark.js",
     "------------------------------------------------": "",
     "typecheck": "tsc --noEmit",

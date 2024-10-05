@@ -1,9 +1,10 @@
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import process from 'node:process'
 import autocannon from 'autocannon'
-import { usecaseMap } from '../server/usecases/usecase-map.js'
-import type { TUsecaseTypeUnion } from '../server/transports/types.js'
+import { type TUsecaseTypeUnion, usecaseMap } from '../server/types.js'
 import { type TBenchmarkSettingsCLI, type TBenchmarkSettingsProgrammatically, type TResultBenchmark, type TUsecaseConfig, getFlagValue } from './utils/index'
+import { defaultBenchmarkConfig } from './benchmark-config.js'
 
 const require = createRequire(import.meta.url)
 
@@ -33,7 +34,7 @@ function prepareRequests(usecaseConfig: TUsecaseConfig) {
   return requests
 }
 
-function startBench(
+function startBenchmark(
   { connections, duration, pipelining, usecaseConfig, workers, transport, usecase }: TBenchmarkSettingsCLI | TBenchmarkSettingsProgrammatically,
 ): Promise<TResultBenchmark> {
   return new Promise((resolve) => {
@@ -84,25 +85,23 @@ function startBench(
   })
 }
 
-// Run from CLI is forbidden in automate mode
-const isAutomateMode = getFlagValue('-automate')
+// ? Run in manual mode (run from CLI is forbidden in automate mode)
+const isAutomateMode = getFlagValue('automate')
 
 if (!isAutomateMode) {
   const usecase = getFlagValue('u') as TUsecaseTypeUnion
   const usecaseConfig = usecaseMap[usecase]!
 
-  if (!usecaseConfig) {
-    throw new Error('Usecase not found!')
-  }
+  if (!usecaseConfig) throw new Error('Usecase not found!')
 
-  startBench({
-    connections: 100,
-    pipelining: 1,
-    workers: 3,
-    duration: 30,
+  startBenchmark({
+    connections: +(getFlagValue('c') || defaultBenchmarkConfig.connections),
+    pipelining: +(getFlagValue('p') || defaultBenchmarkConfig.pipelining),
+    workers: +(getFlagValue('w') || defaultBenchmarkConfig.workers),
+    duration: +(getFlagValue('d') || defaultBenchmarkConfig.duration),
     usecaseConfig,
   })
 }
 
-// Export for benchmark
-export { startBench }
+// Export for benchmark running in automate mode
+export { startBenchmark }

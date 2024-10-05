@@ -1,9 +1,6 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import type { TDefaultSettings, TFileInput, TResultBenchmark, TSnapshotOnDisk } from './types'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const checkIsFileExists = async (pathLike: string): Promise<boolean> => {
   try {

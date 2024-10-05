@@ -1,11 +1,10 @@
-import { spawn } from 'node:child_process'
-import { cpus } from 'node:os'
-import { getFlagValue } from '../benchmarks/utils/helpers'
-import { usecases } from './usecases/usecase-map'
-import { type TTransportTypeUnion, type TUsecaseTypeUnion, transports } from './transports'
+import type { ChildProcessWithoutNullStreams } from 'node:child_process'
+import { getFlagValue, getRuntimeSettings } from '../benchmarks/utils/helpers'
+import { configureCascadeMasterGracefulShutdownOnSignal, runServerInChildProcess } from './helpers'
+import { type THostEnvironment, type TTransportTypeUnion, type TUsecaseTypeUnion, transports, usecases } from './types'
 
 /**
- * @returns Ready child server process
+ * @returns Ready accept to requests child server process
  */
 function startEntrypoint({
   transport,
@@ -14,62 +13,46 @@ function startEntrypoint({
 }: {
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
-  cores: number | string | 'max' | undefined
+  cores: number
 }) {
   return new Promise((resolve) => {
-    const hostEnvironment = transport === 'bun' ? 'bun' : 'node'
-    const realCores = cores === 'max'
-      ? cpus().length
-      : typeof cores === 'undefined'
-        ? 1
-        : Number(cores)
+    const hostEnvironment: THostEnvironment = transport === 'bun' ? 'bun' : 'node'
 
-    const childServerProcess = spawn(hostEnvironment, [
-      './dist/server/main.js',
-      '-t',
-      transport,
-      '-u',
-      usecase,
-      '-cores',
-      String(realCores),
-    ], {
-      detached: true,
-    })
+    const childServerProcessRef: { value: ChildProcessWithoutNullStreams | null } = { value: runServerInChildProcess(hostEnvironment, transport, usecase, cores) }
 
-    childServerProcess.stdout.on('data', (data) => {
+    childServerProcessRef.value?.stdout.on('data', (data) => {
       const stdoutInfo = data?.toString()
 
       if (!stdoutInfo.startsWith('[Hook]')) console.log(stdoutInfo)
 
+      // ! When server starts, it should contain this phrase!
+      // TODO: change to getting message from child process
       if (stdoutInfo.includes('server running on')) {
         // Server is ready to accept requests
-        resolve(childServerProcess)
+        resolve(childServerProcessRef.value)
       }
     })
 
-    childServerProcess.stderr.on('data', (data) => {
+    childServerProcessRef.value?.stderr.on('data', (data) => {
       console.log(`stderr`, data?.toString())
     })
 
-    process.on('SIGINT', () => {
-      process.kill(childServerProcess.pid!, 'SIGINT')
-
-      childServerProcess.on('close', () => {
-        process.exit(0)
-      })
+    childServerProcessRef.value?.on('close', (_code) => {
+      childServerProcessRef.value = null
     })
+
+    ;(['SIGINT', 'SIGTERM'] as const)
+      .forEach(
+        signal => configureCascadeMasterGracefulShutdownOnSignal(childServerProcessRef, signal),
+      )
   })
 }
 
-// Run from CLI is forbidden in automate mode
-const isAutomateMode = getFlagValue('-automate')
+// ! Run in manual mode (run from CLI is forbidden in automate mode)
+const isAutomateMode = getFlagValue('automate')
 
 if (!isAutomateMode) {
-  const [usecase, transport, cores] = [
-    getFlagValue('u') as TUsecaseTypeUnion,
-    getFlagValue('t') as TTransportTypeUnion,
-    getFlagValue('cores'),
-  ]
+  const { usecase, transport, cores } = getRuntimeSettings()
 
   if (!usecases.includes(usecase) || !transports.includes(transport)) {
     throw new Error('Transport or usecases was set incorrect way!')

@@ -1,4 +1,4 @@
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/transports'
+import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/types'
 
 type second = number
 
@@ -10,12 +10,11 @@ type TDefaultSettings = {
   duration: second
 }
 
-type TUsecaseConfig<T extends string = string> = { method: 'GET' | 'POST', path: `/${T}` }
-
 type TBenchmarkSettingsCLI = Omit<TDefaultSettings, 'cores' | 'delayBeforeRunning'>
   & { usecaseConfig: TUsecaseConfig } & Partial<Pick<TResultBenchmark, 'transport' | 'usecase'>>
 
-type TBenchmarkSettingsProgrammatically = TBenchmarkSettingsCLI & Pick<TResultBenchmark, 'transport' | 'usecase'>
+type TBenchmarkSettingsProgrammatically = TBenchmarkSettingsCLI
+  & Pick<TResultBenchmark, 'transport' | 'usecase'>
 
 type TResultBenchmark = {
   transport: TTransportTypeUnion
@@ -42,10 +41,13 @@ type TResultBenchmark = {
   }
 }
 
+/**
+ * @description Config which we can get parsing CLI flags
+ */
 type TRuntimeSettings = {
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
-  cores: number | 'max' | string | undefined
+  cores: number
 }
 
 type TSnapshotOnDisk = {
@@ -54,6 +56,19 @@ type TSnapshotOnDisk = {
 }
 
 type TFileInput = { pathToStorage: string, fileContent: Partial<TSnapshotOnDisk> }
+
+const ALLOWED_FLAGS = ['u', 't', 'c', 'p', 'w', 'd', 'automate', 'cores'] as const
+
+type TAllowedFlags = typeof ALLOWED_FLAGS[number]
+
+type TAutomateConfig = {
+  defaultSettings: Required<TDefaultSettings>
+  runtimeSettings: {
+    usecases: readonly TUsecaseTypeUnion[]
+    transports: readonly TTransportTypeUnion[]
+    cores: ('max' | number)[]
+  }
+}
 
 export type {
   second,
@@ -65,4 +80,8 @@ export type {
   TBenchmarkSettingsProgrammatically,
   TResultBenchmark,
   TSnapshotOnDisk,
+  TAllowedFlags,
+  TAutomateConfig,
 }
+
+export { ALLOWED_FLAGS }

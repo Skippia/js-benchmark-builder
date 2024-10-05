@@ -1,7 +1,6 @@
-import { usecaseMap } from '../usecases/usecase-map'
+import { type TTransportTypeUnion, type TUsecaseTypeUnion, usecaseMap } from '../types'
 import type { AbstractTransport } from './abstract-transport'
 import { Mediator } from './mediator'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from './types'
 
 const transportMap: Partial<Record<TTransportTypeUnion, () => Promise<new (port: number, mediator: Mediator<any>) => AbstractTransport<any>>>> = {
   node: () => import('./impls/node-transport').then(i => i.NodeTransport),

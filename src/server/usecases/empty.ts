@@ -1,4 +1,4 @@
-import type { Context, Hooks } from '../transports'
+import type { Context, Hooks } from '../types'
 
 export const hooks: Hooks = {
   async onInit(callbacks?: Function[]): Promise<Context> {

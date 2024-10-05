@@ -1,4 +1,4 @@
-import type { Context, Hooks } from '../transports'
+import type { Context, Hooks } from '../types'
 
 function heavyBlockingTask() {
   let sum = 0

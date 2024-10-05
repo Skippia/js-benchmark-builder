@@ -1,16 +1,16 @@
 /* eslint-disable no-async-promise-executor */
 import type { spawn } from 'node:child_process'
-import { transports } from '../server/transports'
-import { usecaseMap, usecases } from '../server/usecases/usecase-map.js'
 import { startEntrypoint } from '../server/entrypoint'
+import { usecaseMap } from '../server/types'
 import { buildOperations, logAfterBenchmark, logBeforeBenchmark, logCompleteBenchmark, prepareToBenchmarkFileOnDisk, sleep, updateBenchmarkInfo } from './utils'
 import type { TDefaultSettings, TRuntimeSettings } from './utils'
-import { startBench } from './benchmark.js'
+import { startBenchmark } from './benchmark'
+import { automateBenchmarkConfig } from './benchmark-config'
 
 const runScript = async (
   defaultSettings: TDefaultSettings,
   operation: TRuntimeSettings,
-  pathToStorage: string,
+  pathToLastSnapshotFile: string,
 ): Promise<void> => {
   return new Promise(async (resolve) => {
     // 1. Run server
@@ -21,12 +21,13 @@ const runScript = async (
     }) as ReturnType<typeof spawn>
 
     childServerProcess.on('close', (_code) => {
+      console.log('set null to child process 1')
       // Server process was terminated
       return resolve()
     })
 
     // 2. Run benchmark & collect data
-    const benchmarkResult = await startBench({
+    const benchmarkResult = await startBenchmark({
       connections: defaultSettings.connections,
       pipelining: defaultSettings.pipelining,
       workers: defaultSettings.workers,
@@ -37,28 +38,27 @@ const runScript = async (
     })
 
     // 3. Save benchmark data on disk
-    await updateBenchmarkInfo(pathToStorage, benchmarkResult)
+    await updateBenchmarkInfo(pathToLastSnapshotFile, benchmarkResult)
 
     // 4. Stop server
-    process.kill(-childServerProcess.pid!, 'SIGTERM')
+    process.kill(childServerProcess.pid!, 'SIGTERM')
   })
 }
 
 const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
   // Write info about default settings related with benchmark
-  const pathToStorage = await prepareToBenchmarkFileOnDisk(defaultSettings)
+  const pathToLastSnapshotFile = await prepareToBenchmarkFileOnDisk(defaultSettings)
 
   for (let i = 0; i < operations.length; i++) {
     const operation = operations[i]!
 
     logBeforeBenchmark(defaultSettings, operation, i, operations.length)
 
-    // Run benchmark test
-    await runScript(defaultSettings, operation, pathToStorage)
+    // Run main logic (server + benchmark)
+    await runScript(defaultSettings, operation, pathToLastSnapshotFile)
 
     if (i !== (operations.length - 1)) {
       logAfterBenchmark(defaultSettings)
-
       await sleep(defaultSettings?.delayBeforeRunning || 10)
     }
     else {
@@ -69,13 +69,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
 
 start(
   {
-    defaultSettings: {
-      workers: 3,
-      delayBeforeRunning: 10,
-      duration: 10,
-      connections: 100,
-      pipelining: 1,
-    },
-    operations: buildOperations(usecases, transports, [2]),
+    defaultSettings: automateBenchmarkConfig.defaultSettings,
+    operations: buildOperations(automateBenchmarkConfig.runtimeSettings),
   },
 )

@@ -1,4 +1,4 @@
-import type { Context, Hooks } from '../transports'
+import type { Context, Hooks } from '../types'
 
 function heavyNonBlockingTask(ms = 100) {
   return new Promise(resolve => setTimeout(() => resolve(ms), ms))

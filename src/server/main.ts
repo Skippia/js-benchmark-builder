@@ -1,29 +1,14 @@
 import cluster from 'node:cluster'
 import process from 'node:process'
-import { getFlagValue } from '../benchmarks/utils'
-import { type TTransportTypeUnion, type TUsecaseTypeUnion, buildTransport } from './transports'
+import { type TRuntimeSettings, getRuntimeSettings } from '../benchmarks/utils'
+import { buildTransport } from './transports'
+import { configureCascadeChildGracefulShutdownOnSignal } from './helpers'
 
-function configureMasterGracefulShutdown() {
-  process.on('SIGINT', () => {
-    console.log('Master process received SIGINT. Sending SIGINT to all workers.')
-
-    // Send SIGINT to all workers
-    for (const id in cluster.workers) {
-      if (cluster.workers[id]) {
-        cluster.workers[id].process.kill('SIGINT')
-      }
-    }
-  })
-}
-const [transport, usecase, cores] = [
-  getFlagValue('t') as TTransportTypeUnion,
-  getFlagValue('u') as TUsecaseTypeUnion,
-  +getFlagValue('cores')! as number,
-]
-
+/**
+ * @description this file will be run in child process
+ */
 export async function buildServer(
-  { transport, usecase, cores }:
-  { transport: TTransportTypeUnion, usecase: TUsecaseTypeUnion, cores: number },
+  { transport, usecase, cores }: TRuntimeSettings,
 ) {
   const port = Number(process.env.PORT || 3001)
 
@@ -32,7 +17,8 @@ export async function buildServer(
   )
 
   if (cluster.isPrimary) {
-    configureMasterGracefulShutdown()
+    ;(['SIGINT', 'SIGTERM'] as const).forEach(configureCascadeChildGracefulShutdownOnSignal)
+
     console.log(`Server will be run on ${cores} logical cores`)
 
     for (let i = 0; i < cores; i++) {
@@ -54,4 +40,4 @@ export async function buildServer(
   }
 }
 
-buildServer({ transport, usecase, cores })
+buildServer(getRuntimeSettings())

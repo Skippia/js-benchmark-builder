@@ -1,5 +1,5 @@
 import { createNewUser, redis } from '../infra/redis.mjs'
-import type { Context, Hooks } from '../transports'
+import type { Context, Hooks } from '../types'
 
 type RedisCreateUserContext
   = Context & { createNewUser: ({ email, password }: { email: string, password: string }) => Promise<{ email: string, password: string }> }

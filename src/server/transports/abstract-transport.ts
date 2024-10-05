@@ -1,5 +1,5 @@
+import type { Context } from '../types'
 import type { Mediator } from './mediator'
-import type { Context } from './types'
 
 export abstract class AbstractTransport<T extends Record<string, unknown> = {}> {
   constructor(readonly mediator: Mediator<T>) {}
@@ -45,6 +45,7 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
       await closeServerCallback()
 
       console.log('[Hook][Child]: terminate process with code', 1)
+      process.exit(1)
     })
   }
 }
