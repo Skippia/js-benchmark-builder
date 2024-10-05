@@ -2,7 +2,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import autocannon from 'autocannon'
-import { type TUsecaseTypeUnion, usecaseMap } from '../server/types.js'
+import { type TUsecaseTypeUnion, usecaseMap } from '../server/misc/types.js'
 import { type TBenchmarkSettingsCLI, type TBenchmarkSettingsProgrammatically, type TResultBenchmark, type TUsecaseConfig, getFlagValue } from './utils/index'
 import { defaultBenchmarkConfig } from './benchmark-config.js'
 

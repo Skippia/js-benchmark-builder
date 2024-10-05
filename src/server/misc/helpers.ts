@@ -1,9 +1,12 @@
+/* eslint-disable no-async-promise-executor */
 import cluster from 'node:cluster'
 import process from 'node:process'
 import { spawn } from 'node:child_process'
-import { getFlagValue } from '../benchmarks/utils'
-import type { THostEnvironment, TTransportTypeUnion, TUsecaseTypeUnion } from './types'
+import { startBenchmark } from '../../benchmarks/benchmark'
+import { type TDefaultSettings, type TRuntimeSettings, updateBenchmarkInfo } from '../../benchmarks/utils'
+import { startEntrypoint } from '../entrypoint'
 import type { ServerProcessManager } from './server-process-manager'
+import { type THostEnvironment, type TTransportTypeUnion, type TUsecaseTypeUnion, usecaseMap } from './types'
 
 /**
  * @description GS for parent process
@@ -71,4 +74,42 @@ export const runServerInChildProcess = (
   console.log('Spawn new child process:', childProcess.pid)
 
   return childProcess
+}
+
+export const runScript = async (
+  defaultSettings: TDefaultSettings,
+  operation: TRuntimeSettings,
+  pathToLastSnapshotFile: string,
+  currentChildProcessManagerRef: { value: ServerProcessManager | null },
+): Promise<void> => {
+  return new Promise(async (resolve) => {
+    // 1. Run server & and hold reference to the actual child process
+    currentChildProcessManagerRef.value = await startEntrypoint({
+      cores: operation.cores,
+      transport: operation.transport,
+      usecase: operation.usecase,
+    })
+
+    currentChildProcessManagerRef.value!.on('close', (_code) => {
+      // Server process was terminated
+      return resolve()
+    })
+
+    // 2. Run benchmark & collect data
+    const benchmarkResult = await startBenchmark({
+      connections: defaultSettings.connections,
+      pipelining: defaultSettings.pipelining,
+      workers: defaultSettings.workers,
+      duration: defaultSettings.duration,
+      usecaseConfig: usecaseMap[operation.usecase]!,
+      transport: operation.transport,
+      usecase: operation.usecase,
+    })
+
+    // 3. Save benchmark data on disk
+    await updateBenchmarkInfo(pathToLastSnapshotFile, benchmarkResult)
+
+    // 4. Stop server
+    currentChildProcessManagerRef.value.stop('SIGTERM')
+  })
 }

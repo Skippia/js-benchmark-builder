@@ -1,4 +1,4 @@
-import { type TTransportTypeUnion, type TUsecaseTypeUnion, usecaseMap } from '../types'
+import { type TTransportTypeUnion, type TUsecaseTypeUnion, usecaseMap } from '../misc/types'
 import type { AbstractTransport } from './abstract-transport'
 import { Mediator } from './mediator'
 
@@ -14,6 +14,7 @@ export async function buildTransport(config: { transport: TTransportTypeUnion, u
   const { transport, usecase, port } = config
 
   const { hooks, run } = (await import(`../usecases/${usecase}.js`))
+
   const usecaseConfig = usecaseMap[usecase]
 
   if (!usecaseConfig) {

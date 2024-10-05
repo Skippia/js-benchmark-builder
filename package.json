@@ -10,6 +10,7 @@
   "scripts": {
     "eslint": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
+    "clear:benchmarks": "find benchmarks-data/ -maxdepth 1 -type f -name 'benchmark-*.json' -delete",
     "----------------------------------------------": "",
     "docker:infra": "docker-compose -f ./src/infra/docker-compose.yaml down && docker-compose -f ./src/infra/docker-compose.yaml up",
     "docker:clear": "docker volume rm $(docker volume ls -f dangling=true -q) && docker rm -f $(docker ps -a --filter name=^nmt- -q) && docker rmi $(docker images -f dangling=true -q)",

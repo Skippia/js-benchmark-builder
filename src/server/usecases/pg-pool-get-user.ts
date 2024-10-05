@@ -1,10 +1,10 @@
 import { createUser, getUser, pgPoolClient } from '../infra/pg.mjs'
-import type { Context, Hooks } from '../types'
+import type { TContext, THooks } from '../misc/types'
 
 type PgPoolGetUserContext
-  = Context & { getUser: () => Promise<({ email: string, password: string })> }
+  = TContext & { getUser: () => Promise<({ email: string, password: string })> }
 
-export const hooks: Hooks = {
+export const hooks: THooks = {
   async onInit(callbacks?: Function[]): Promise<PgPoolGetUserContext> {
     const context: PgPoolGetUserContext = {
       getUser: getUser(pgPoolClient),

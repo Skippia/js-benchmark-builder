@@ -2,7 +2,7 @@ import cluster from 'node:cluster'
 import process from 'node:process'
 import { type TRuntimeSettings, getRuntimeSettings } from '../benchmarks/utils'
 import { buildTransport } from './transports'
-import { configureCascadeChildGracefulShutdown } from './helpers'
+import { configureCascadeChildGracefulShutdown } from './misc/helpers'
 
 /**
  * @description this file will be run in child process

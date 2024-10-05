@@ -1,10 +1,10 @@
 import { createUser, getUser, redis } from '../infra/redis.mjs'
-import type { Context, Hooks } from '../types'
+import type { TContext, THooks } from '../misc/types'
 
 type RedisGetUserContext
-  = Context & { getUser: () => Promise<({ email: string, password: string })> }
+  = TContext & { getUser: () => Promise<({ email: string, password: string })> }
 
-export const hooks: Hooks = {
+export const hooks: THooks = {
   async onInit(callbacks?: Function[]): Promise<RedisGetUserContext> {
     const context: RedisGetUserContext = {
       getUser: () => getUser(redis),

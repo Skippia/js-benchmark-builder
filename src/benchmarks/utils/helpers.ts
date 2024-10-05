@@ -1,5 +1,6 @@
 import { cpus } from 'node:os'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/types'
+import process from 'node:process'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/misc/types'
 import { ALLOWED_FLAGS, type TAllowedFlags, type TAutomateConfig, type TDefaultSettings, type TRuntimeSettings, type second } from './types'
 
 const sleep = (ms: second) => new Promise(res => setTimeout(res, ms * 1000))
@@ -23,7 +24,7 @@ const getFlagValue = (flag: TAllowedFlags): TUsecaseTypeUnion | TTransportTypeUn
 
   const index = options.indexOf(`-${flag}`)
 
-  if (flag === 'automate') return 'automate-mode'
+  if (flag === 'automate' && index !== -1) return 'automate-mode'
 
   return index !== -1 ? options[index + 1] : undefined
 }

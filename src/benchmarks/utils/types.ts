@@ -1,4 +1,4 @@
-import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/types'
+import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/misc/types'
 
 type second = number
 

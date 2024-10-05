@@ -1,4 +1,4 @@
-import type { Context, Hooks } from '../types'
+import type { TContext, THooks } from '../misc/types'
 
 function heavyBlockingTask() {
   let sum = 0
@@ -10,8 +10,8 @@ function heavyBlockingTask() {
   return sum
 }
 
-export const hooks: Hooks = {
-  async onInit(callbacks?: Function[]): Promise<Context> {
+export const hooks: THooks = {
+  async onInit(callbacks?: Function[]): Promise<TContext> {
     const context = {}
     console.log('[Hook][onInit]: Initializing context...')
 
@@ -34,7 +34,7 @@ export const hooks: Hooks = {
 
 export async function run(
   _payload: unknown,
-  _context: Context,
+  _context: TContext,
 ): Promise<unknown> {
   return heavyBlockingTask()
 }

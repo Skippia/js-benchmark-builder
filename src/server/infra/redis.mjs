@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
+import process from 'node:process'
 import Redis from 'ioredis'
 
 export async function createRedisConnection(options) {

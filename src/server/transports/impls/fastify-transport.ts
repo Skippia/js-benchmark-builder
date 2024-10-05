@@ -1,3 +1,4 @@
+import process from 'node:process'
 import type { FastifyInstance, RouteHandlerMethod } from 'fastify'
 import Fastify from 'fastify'
 import { AbstractTransport } from '../abstract-transport'

@@ -1,4 +1,5 @@
-import type { Context } from '../types'
+import process from 'node:process'
+import type { TContext } from '../misc/types'
 import type { Mediator } from './mediator'
 
 export abstract class AbstractTransport<T extends Record<string, unknown> = {}> {
@@ -11,10 +12,10 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
    * @description Initialize context, run callbacks
    * before HTTP server will be initialized.
    */
-  async initBeforeServer(callbacks?: Function[]): Promise<Context<T>> {
+  async initBeforeServer(callbacks?: Function[]): Promise<TContext<T>> {
     return (await this.mediator.runHook('onInit', [() => {
       console.log(`[${this.mediator.transport}] expects [${this.mediator.targetMethod}]: ${this.mediator.targetPath}`)
-    }, ...(callbacks || [])])) as Context<T>
+    }, ...(callbacks || [])])) as TContext<T>
   }
 
   /**

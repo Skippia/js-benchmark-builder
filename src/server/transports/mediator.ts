@@ -1,15 +1,15 @@
-import type { Context, Hooks, MediatorProperties, TTransportTypeUnion } from '../types'
+import type { TContext, THooks, TMediatorProperties, TRunFn, TTransportTypeUnion } from '../misc/types'
 
-export class Mediator<T extends Record<string, unknown>> implements MediatorProperties {
+export class Mediator<T extends Record<string, unknown>> implements TMediatorProperties {
   transport: TTransportTypeUnion
   targetMethod: 'GET' | 'POST'
   targetPath: string
-  run: Function
-  hooks: Hooks
-  context: Context<T>
+  run: TRunFn
+  hooks: THooks
+  context: TContext<T>
 
   constructor(
-    mediatorProperties: MediatorProperties,
+    mediatorProperties: TMediatorProperties,
   ) {
     this.transport = mediatorProperties.transport
     this.targetMethod = mediatorProperties.targetMethod
@@ -19,7 +19,7 @@ export class Mediator<T extends Record<string, unknown>> implements MediatorProp
     this.context = {} as T
   }
 
-  async runHook(hookName: keyof Hooks, callbacks?: Function[]): Promise<void | Context<T>> {
+  async runHook(hookName: keyof THooks, callbacks?: Function[]): Promise<void | TContext<T>> {
     const hook = this.hooks[hookName]
 
     if (hook) {

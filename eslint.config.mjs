@@ -19,7 +19,6 @@ export default antfu(
       'prefer-const': 'error',
       'no-undef': 'off',
       'no-console': 'off',
-      'node/prefer-global/process': 'off',
       '@typescript-eslint/consistent-type-definitions': [
         'error',
         'type',

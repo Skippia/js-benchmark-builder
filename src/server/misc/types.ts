@@ -50,32 +50,41 @@ type TTransportTypeUnion = typeof transports[number]
 
 type THostEnvironment = 'bun' | 'node'
 
-type Context<T extends Record<string, unknown> = {}> = {
+type TContext<T extends Record<string, unknown> = {}> = {
   [key: string]: unknown
 } & T
 
-type Hooks = {
-  onInit?: () => Promise<Context>
+type THooks = {
+  onInit?: () => Promise<TContext>
   onRequest?: (req: Request) => Promise<void>
   onFinish?: (res: Response) => Promise<void>
   onClose: () => Promise<void>
 }
 
-type MediatorProperties = {
+type TRunFn = (_payload?: unknown, _context?: TContext) => Promise<unknown>
+
+ type TUsecaseBuilder = {
+   hooks: THooks
+   run: TRunFn
+ }
+
+type TMediatorProperties = {
   transport: TTransportTypeUnion
   targetMethod: 'GET' | 'POST'
   targetPath: string
-  hooks: Hooks
-  run: Function
+  hooks: THooks
+  run: TRunFn
 }
 
 export { transports, usecases, usecaseMap }
 export type {
   TTransportTypeUnion,
-  Context,
-  Hooks,
-  MediatorProperties,
+  TContext,
+  THooks,
+  TRunFn,
+  TMediatorProperties,
   TUsecaseTypeUnion,
   TUsecaseConfig,
   THostEnvironment,
+  TUsecaseBuilder,
 }
