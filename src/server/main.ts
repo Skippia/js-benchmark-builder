@@ -2,7 +2,7 @@ import cluster from 'node:cluster'
 import process from 'node:process'
 import { type TRuntimeSettings, getRuntimeSettings } from '../benchmarks/utils'
 import { buildTransport } from './transports'
-import { configureCascadeChildGracefulShutdownOnSignal } from './helpers'
+import { configureCascadeChildGracefulShutdown } from './helpers'
 
 /**
  * @description this file will be run in child process
@@ -17,7 +17,7 @@ export async function buildServer(
   )
 
   if (cluster.isPrimary) {
-    ;(['SIGINT', 'SIGTERM'] as const).forEach(configureCascadeChildGracefulShutdownOnSignal)
+    configureCascadeChildGracefulShutdown()
 
     console.log(`Server will be run on ${cores} logical cores`)
 
@@ -30,7 +30,7 @@ export async function buildServer(
     cluster.on('exit', (_worker, _code, _signal) => {
       workersExited++
       if (workersExited === cores) {
-        console.log('All workers have exited. Exiting master process.')
+        console.log('All workers have exited. Exiting master process of server.')
         process.exit(0)
       }
     })

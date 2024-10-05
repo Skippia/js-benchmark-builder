@@ -57,4 +57,14 @@ const buildOperations = ({
   )
 }
 
-export { sleep, getFlagValue, logBeforeBenchmark, logAfterBenchmark, logCompleteBenchmark, buildOperations }
+const checkIsManualMode = () => !getFlagValue('automate')
+
+export {
+  sleep,
+  getFlagValue,
+  logBeforeBenchmark,
+  logAfterBenchmark,
+  logCompleteBenchmark,
+  buildOperations,
+  checkIsManualMode,
+}

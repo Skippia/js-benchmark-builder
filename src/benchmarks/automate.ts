@@ -1,8 +1,17 @@
 /* eslint-disable no-async-promise-executor */
-import type { spawn } from 'node:child_process'
 import { startEntrypoint } from '../server/entrypoint'
 import { usecaseMap } from '../server/types'
-import { buildOperations, logAfterBenchmark, logBeforeBenchmark, logCompleteBenchmark, prepareToBenchmarkFileOnDisk, sleep, updateBenchmarkInfo } from './utils'
+import { configureCascadeMasterGracefulShutdown } from '../server/helpers'
+import type { ServerProcessManager } from '../server/server-process-manager'
+import {
+  buildOperations,
+  logAfterBenchmark,
+  logBeforeBenchmark,
+  logCompleteBenchmark,
+  prepareToBenchmarkFileOnDisk,
+  sleep,
+  updateBenchmarkInfo,
+} from './utils'
 import type { TDefaultSettings, TRuntimeSettings } from './utils'
 import { startBenchmark } from './benchmark'
 import { automateBenchmarkConfig } from './benchmark-config'
@@ -11,17 +20,17 @@ const runScript = async (
   defaultSettings: TDefaultSettings,
   operation: TRuntimeSettings,
   pathToLastSnapshotFile: string,
+  currentChildProcessManagerRef: { value: ServerProcessManager | null },
 ): Promise<void> => {
   return new Promise(async (resolve) => {
-    // 1. Run server
-    const childServerProcess = await startEntrypoint({
+    // 1. Run server & and hold reference to the actual child process
+    currentChildProcessManagerRef.value = await startEntrypoint({
       cores: operation.cores,
       transport: operation.transport,
       usecase: operation.usecase,
-    }) as ReturnType<typeof spawn>
+    })
 
-    childServerProcess.on('close', (_code) => {
-      console.log('set null to child process 1')
+    currentChildProcessManagerRef.value!.on('close', (_code) => {
       // Server process was terminated
       return resolve()
     })
@@ -41,11 +50,22 @@ const runScript = async (
     await updateBenchmarkInfo(pathToLastSnapshotFile, benchmarkResult)
 
     // 4. Stop server
-    process.kill(childServerProcess.pid!, 'SIGTERM')
+    currentChildProcessManagerRef.value.stop('SIGTERM')
   })
 }
 
 const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
+  /**
+   * @description Graceful shutdown callback some way must
+   * hold reference to the actual child process.
+   * Since brand new process is spawn in while cycle, we must use
+   * one global GS callback which tracks down last spawned process.
+   */
+  const currentChildProcessManagerRef: { value: ServerProcessManager | null } = { value: null }
+
+  // Set graceful shutdown
+  configureCascadeMasterGracefulShutdown(currentChildProcessManagerRef)
+
   // Write info about default settings related with benchmark
   const pathToLastSnapshotFile = await prepareToBenchmarkFileOnDisk(defaultSettings)
 
@@ -55,7 +75,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
     logBeforeBenchmark(defaultSettings, operation, i, operations.length)
 
     // Run main logic (server + benchmark)
-    await runScript(defaultSettings, operation, pathToLastSnapshotFile)
+    await runScript(defaultSettings, operation, pathToLastSnapshotFile, currentChildProcessManagerRef)
 
     if (i !== (operations.length - 1)) {
       logAfterBenchmark(defaultSettings)

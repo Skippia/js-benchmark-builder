@@ -1,12 +1,13 @@
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
-import { getFlagValue, getRuntimeSettings } from '../benchmarks/utils/helpers'
-import { configureCascadeMasterGracefulShutdownOnSignal, runServerInChildProcess } from './helpers'
+import { checkIsManualMode, getFlagValue, getRuntimeSettings } from '../benchmarks/utils/helpers'
+import { configureCascadeMasterGracefulShutdown, runServerInChildProcess } from './helpers'
 import { type THostEnvironment, type TTransportTypeUnion, type TUsecaseTypeUnion, transports, usecases } from './types'
+import { ServerProcessManager } from './server-process-manager'
 
 /**
  * @returns Ready accept to requests child server process
  */
-function startEntrypoint({
+async function startEntrypoint({
   transport,
   usecase,
   cores,
@@ -14,44 +15,20 @@ function startEntrypoint({
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
   cores: number
-}) {
-  return new Promise((resolve) => {
-    const hostEnvironment: THostEnvironment = transport === 'bun' ? 'bun' : 'node'
+}): Promise<ServerProcessManager> {
+  // 1. Create wrapper around process instance (still empty)
+  const childProcessManager = new ServerProcessManager(transport, usecase, cores)
 
-    const childServerProcessRef: { value: ChildProcessWithoutNullStreams | null } = { value: runServerInChildProcess(hostEnvironment, transport, usecase, cores) }
+  // 2. Spawn child process
+  await childProcessManager.start()
 
-    childServerProcessRef.value?.stdout.on('data', (data) => {
-      const stdoutInfo = data?.toString()
-
-      if (!stdoutInfo.startsWith('[Hook]')) console.log(stdoutInfo)
-
-      // ! When server starts, it should contain this phrase!
-      // TODO: change to getting message from child process
-      if (stdoutInfo.includes('server running on')) {
-        // Server is ready to accept requests
-        resolve(childServerProcessRef.value)
-      }
-    })
-
-    childServerProcessRef.value?.stderr.on('data', (data) => {
-      console.log(`stderr`, data?.toString())
-    })
-
-    childServerProcessRef.value?.on('close', (_code) => {
-      childServerProcessRef.value = null
-    })
-
-    ;(['SIGINT', 'SIGTERM'] as const)
-      .forEach(
-        signal => configureCascadeMasterGracefulShutdownOnSignal(childServerProcessRef, signal),
-      )
-  })
+  return childProcessManager
 }
 
-// ! Run in manual mode (run from CLI is forbidden in automate mode)
-const isAutomateMode = getFlagValue('automate')
+const isManualMode = checkIsManualMode()
 
-if (!isAutomateMode) {
+// ! Run in manual mode (run from CLI is forbidden in automate mode)
+if (isManualMode) {
   const { usecase, transport, cores } = getRuntimeSettings()
 
   if (!usecases.includes(usecase) || !transports.includes(transport)) {
