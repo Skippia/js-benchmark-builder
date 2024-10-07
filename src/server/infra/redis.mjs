@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
 import process from 'node:process'
+
 import Redis from 'ioredis'
 
 export async function createRedisConnection(options) {
@@ -111,18 +112,15 @@ class RedisClient {
   }
 }
 
+// eslint-disable-next-line antfu/no-top-level-await
 export const redis = new RedisClient(await createRedisConnection(optionsRedis))
 
 export function createUser(redis) {
-  return async (email, password) => {
-    return await redis.set('user', { email, password })
-  }
+  return async (email, password) => await redis.set('user', { email, password })
 }
 
 export function createNewUser(redis) {
-  return async (email, password) => {
-    return await redis.set(randomUUID(), { email, password }, { get: true })
-  }
+  return async (email, password) => await redis.set(randomUUID(), { email, password }, { get: true })
 }
 
 export async function getUser(redis) {

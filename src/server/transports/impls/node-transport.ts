@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import http from 'node:http'
+
 import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
@@ -19,13 +20,13 @@ export class NodeTransport<T extends NodeContextProperties> extends AbstractTran
   async run(): Promise<void> {
     this.mediator.context = await this.initBeforeServer()
 
-    const handleRequest
-      = this.mediator.buildHandleRequestWrapper(this.getRequestBody)
+    const handleRequest = this.mediator.buildHandleRequestWrapper(this.getRequestBody)
 
+    // eslint-disable-next-line ts/no-misused-promises
     this.mediator.context.server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
       if (this.mediator.targetMethod === req.method && this.mediator.targetPath === req.url) {
         try {
-          const result = await handleRequest(req)
+          const result = await handleRequest({ req, res })
 
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify(result))
@@ -53,7 +54,7 @@ export class NodeTransport<T extends NodeContextProperties> extends AbstractTran
   getRequestBody(req: IncomingMessage) {
     return new Promise((resolve, reject) => {
       const chunks: Uint8Array[] = []
-      req.on('data', chunk => chunks.push(chunk))
+      req.on('data', (chunk: Uint8Array) => chunks.push(chunk))
       req.on('end', () => {
         const body = Buffer.concat(chunks).toString()
         resolve(JSON.parse(body))

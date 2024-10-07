@@ -1,4 +1,6 @@
-import { type Server, serve } from 'bun'
+import { serve } from 'bun'
+import type { Server } from 'bun'
+
 import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
@@ -17,8 +19,7 @@ export class BunTransport<T extends BunContextProperties> extends AbstractTransp
   async run(): Promise<void> {
     this.mediator.context = await this.initBeforeServer()
 
-    const handleRequest
-      = this.mediator.buildHandleRequestWrapper(req => req.json())
+    const handleRequest = this.mediator.buildHandleRequestWrapper<Request, Response>(req => req.json())
 
     this.mediator.context.server = serve({
       port: this.port,
@@ -27,7 +28,7 @@ export class BunTransport<T extends BunContextProperties> extends AbstractTransp
         const method = req.method
 
         if (this.mediator.targetMethod === method && this.mediator.targetPath === url.pathname) {
-          const result = await handleRequest(req)
+          const result = await handleRequest({ req })
 
           return new Response(JSON.stringify(result), {
             headers: { 'Content-Type': 'application/json' },

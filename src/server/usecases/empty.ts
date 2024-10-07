@@ -1,7 +1,7 @@
-import type { TContext, THooks, TRunFn } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../misc/types'
 
 export const hooks: THooks = {
-  async onInit(callbacks?: Function[]): Promise<TContext> {
+  onInit(callbacks?: TFunction[]): TContext {
     const context = {}
     console.log('[Hook][onInit]: Initializing context...')
 
@@ -17,40 +17,14 @@ export const hooks: THooks = {
   //   console.log('[Hook][onFinish]: Finishing response...')
   // },
 
-  async onClose(): Promise<void> {
+  onClose(): void {
     console.log('[Hook][onClose]: Close server...')
   },
 }
 
-export async function run(
+export function run(
   _payload: unknown,
   _context: TContext,
-): Promise<unknown> {
+): unknown {
   return 'Empty data'
 }
-
-// export const usecase: TUsecaseBuilder = {
-//   hooks: {
-//     async onInit(callbacks?: Function[]): Promise<TContext> {
-//       const context = {}
-//       console.log('[Hook][onInit]: Initializing context...')
-
-//       callbacks?.forEach(c => c())
-
-//       return context
-//     },
-//     // async onRequest(_req: Request): Promise<void> {
-//     //   console.log('[Hook][onRequest]: Request received...')
-//     // },
-
-//     // async onFinish(_res: Response): Promise<void> {
-//     //   console.log('[Hook][onFinish]: Finishing response...')
-//     // },
-//     async onClose(): Promise<void> {
-//       console.log('[Hook][onClose]: Close server...')
-//     },
-//   },
-//   async run(_payload?: unknown, _context?: TContext): Promise<unknown> {
-//     return 'Empty data'
-//   },
-// }

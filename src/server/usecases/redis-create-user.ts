@@ -1,11 +1,11 @@
 import { createNewUser, redis } from '../infra/redis.mjs'
-import type { TContext, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../misc/types'
 
 type RedisCreateUserContext
   = TContext & { createNewUser: ({ email, password }: { email: string, password: string }) => Promise<{ email: string, password: string }> }
 
 export const hooks: THooks = {
-  async onInit(callbacks?: Function[]): Promise<RedisCreateUserContext> {
+  onInit(callbacks?: TFunction[]): RedisCreateUserContext {
     const context: RedisCreateUserContext = {
       createNewUser: createNewUser(redis),
     }
@@ -23,7 +23,7 @@ export const hooks: THooks = {
   //   console.log('[Hook][onFinish]: Finishing response...')
   // },
 
-  async onClose(): Promise<void> {
+  onClose(): void {
     console.log('[Hook][onClose]: Close server...')
   },
 }

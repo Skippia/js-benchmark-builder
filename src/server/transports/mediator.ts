@@ -1,4 +1,4 @@
-import type { TContext, THooks, TMediatorProperties, TRunFn, TTransportTypeUnion } from '../misc/types'
+import type { TContext, TFunction, THooks, TMediatorProperties, TRunFn, TTransportTypeUnion } from '../misc/types'
 
 export class Mediator<T extends Record<string, unknown>> implements TMediatorProperties {
   transport: TTransportTypeUnion
@@ -19,32 +19,59 @@ export class Mediator<T extends Record<string, unknown>> implements TMediatorPro
     this.context = {} as T
   }
 
-  async runHook(hookName: keyof THooks, callbacks?: Function[]): Promise<void | TContext<T>> {
+  async runHook<TTransportRequest, TTransportResponse>(
+    hookName: keyof THooks,
+    options: { req?: TTransportRequest, res?: TTransportResponse, callbacks?: TFunction[] },
+  ): Promise<void | TContext<T>> {
     const hook = this.hooks[hookName]
+    const { req, res, callbacks } = options
 
-    if (hook) {
-      if (hookName === 'onInit') {
-        return await (hook as Function)(callbacks)
-      }
-      await (hook as Function)()
+    if (!hook) return
+
+    if (hookName === 'onInit') {
+      return await (hook as Required<THooks>['onInit'])(callbacks) as TContext<T>
+    }
+    else if (hookName === 'onRequest') {
+      await (hook as Required<THooks>['onRequest'])(req)
+    }
+    else if (hookName === 'onFinish') {
+      await (hook as Required<THooks>['onFinish'])(res)
+    }
+
+    // eslint-disable-next-line ts/no-unnecessary-condition
+    else if (hookName === 'onClose') {
+      await (hook as THooks['onClose'])()
     }
   }
 
-  async _handleRequest(
-    payload?: unknown,
+  async _handleRequest<TTransportRequest, TTransportResponse>(
+    options: {
+      payload?: unknown
+      req: TTransportRequest
+      res?: TTransportResponse
+    },
   ): Promise<unknown> {
-    // await this.runHook('onRequest')
+    const { payload, req, res } = options
 
-    const result = this.run(payload, this.context)
+    await this.runHook('onRequest', { req })
 
-    // await this.runHook('onFinish')
+    const result = await this.run(payload, this.context)
+
+    await this.runHook('onFinish', { res })
 
     return result
   }
 
-  buildHandleRequestWrapper(getBody: (req: any) => Promise<unknown> | unknown) {
+  // eslint-disable-next-line ts/no-redundant-type-constituents
+  buildHandleRequestWrapper<TTransportRequest, TTransportResponse>(getBody: (req: TTransportRequest) => (Promise<unknown> | unknown)) {
     return this.targetMethod === 'POST'
-      ? async (req: any) => this._handleRequest(await getBody(req))
-      : () => this._handleRequest()
+      ? async ({ req, res }: {
+        req: TTransportRequest
+        res?: TTransportResponse
+      }) => await this._handleRequest<TTransportRequest, TTransportResponse>({ payload: await getBody(req), req, res })
+      : ({ req, res }: {
+          req: TTransportRequest
+          res?: TTransportResponse
+        }) => this._handleRequest({ req, res })
   }
 }

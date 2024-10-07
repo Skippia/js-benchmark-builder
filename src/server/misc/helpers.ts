@@ -1,6 +1,8 @@
+import { spawn } from 'node:child_process'
+import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import cluster from 'node:cluster'
 import process from 'node:process'
-import { spawn } from 'node:child_process'
+
 import type { ServerProcessManager } from './server-process-manager'
 import type { THostEnvironment, TTransportTypeUnion, TUsecaseTypeUnion } from './types'
 
@@ -15,7 +17,7 @@ export const configureCascadeMasterGracefulShutdown = (childProcessManagerRef: {
       const exitCode = signal === 'SIGTERM' ? 1 : 0
 
       if (childProcessManagerRef.value?.isRunning) {
-        childProcessManagerRef.value?.childProcess!.on('close', () => {
+        (childProcessManagerRef.value.childProcess as ChildProcessWithoutNullStreams).on('close', () => {
           process.exit(exitCode)
         })
 
@@ -37,7 +39,7 @@ export const configureCascadeChildGracefulShutdown = () => {
 
   signals.forEach((signal) => {
     process.on(signal, () => {
-      console.log(`Master process of server received ${signal}. Sending ${signal} to all workers (amount = ${cluster.workers?.length || 0}). `)
+      console.log(`Master process of server received ${signal}. Sending ${signal} to all workers (amount = ${(Object.keys(cluster.workers || ({} as NodeJS.Dict<Worker>))).length}). `)
 
       // Send SIGINT to all workers
       for (const id in cluster.workers) {

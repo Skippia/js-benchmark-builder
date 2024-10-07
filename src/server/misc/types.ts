@@ -50,17 +50,16 @@ type TTransportTypeUnion = typeof transports[number]
 
 type THostEnvironment = 'bun' | 'node'
 
-type TContext<T extends Record<string, unknown> = {}> = {
-  [key: string]: unknown
-} & T
+type TContext<T extends Record<string, unknown> = {}> = Record<string, unknown> & T
 
 type THooks = {
-  onInit?: () => Promise<TContext>
-  onRequest?: (req: Request) => Promise<void>
-  onFinish?: (res: Response) => Promise<void>
-  onClose: () => Promise<void>
+  onInit?: (callbacks?: TFunction[]) => Promise<TContext> | TContext
+  onRequest?: <TReq>(req: TReq) => Promise<void>
+  onFinish?: <TRes>(res: TRes) => Promise<void>
+  onClose: () => Promise<void> | void
 }
 
+type TFunction = (...args: any[]) => unknown
 type TRunFn = (_payload?: unknown, _context?: TContext) => Promise<unknown>
 
  type TUsecaseBuilder = {
@@ -76,15 +75,16 @@ type TMediatorProperties = {
   run: TRunFn
 }
 
-export { transports, usecases, usecaseMap }
+export { transports, usecaseMap, usecases }
 export type {
-  TTransportTypeUnion,
   TContext,
+  TFunction,
   THooks,
-  TRunFn,
-  TMediatorProperties,
-  TUsecaseTypeUnion,
-  TUsecaseConfig,
   THostEnvironment,
+  TMediatorProperties,
+  TRunFn,
+  TTransportTypeUnion,
   TUsecaseBuilder,
+  TUsecaseConfig,
+  TUsecaseTypeUnion,
 }

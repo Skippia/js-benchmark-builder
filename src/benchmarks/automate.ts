@@ -1,58 +1,11 @@
-/* eslint-disable no-async-promise-executor */
-import { startEntrypoint } from '../server/entrypoint'
-import { usecaseMap } from '../server/misc/types'
 import { configureCascadeMasterGracefulShutdown } from '../server/misc/helpers'
 import type { ServerProcessManager } from '../server/misc/server-process-manager'
-import {
-  buildOperations,
-  logAfterBenchmark,
-  logBeforeBenchmark,
-  logCompleteBenchmark,
-  prepareToBenchmarkFileOnDisk,
-  sleep,
-  updateBenchmarkInfo,
-} from './utils'
-import type { TDefaultSettings, TRuntimeSettings } from './utils'
-import { startBenchmark } from './benchmark'
+
 import { automateBenchmarkConfig } from './benchmark-config'
-
-export const runScript = async (
-  defaultSettings: TDefaultSettings,
-  operation: TRuntimeSettings,
-  pathToLastSnapshotFile: string,
-  currentChildProcessManagerRef: { value: ServerProcessManager | null },
-): Promise<void> => {
-  return new Promise(async (resolve) => {
-    // 1. Run server & and hold reference to the actual child process
-    currentChildProcessManagerRef.value = await startEntrypoint({
-      cores: operation.cores,
-      transport: operation.transport,
-      usecase: operation.usecase,
-    })
-
-    currentChildProcessManagerRef.value!.on('close', (_code) => {
-      // Server process was terminated
-      return resolve()
-    })
-
-    // 2. Run benchmark & collect data
-    const benchmarkResult = await startBenchmark({
-      connections: defaultSettings.connections,
-      pipelining: defaultSettings.pipelining,
-      workers: defaultSettings.workers,
-      duration: defaultSettings.duration,
-      usecaseConfig: usecaseMap[operation.usecase]!,
-      transport: operation.transport,
-      usecase: operation.usecase,
-    })
-
-    // 3. Save benchmark data on disk
-    await updateBenchmarkInfo(pathToLastSnapshotFile, benchmarkResult)
-
-    // 4. Stop server
-    currentChildProcessManagerRef.value.stop('SIGTERM')
-  })
-}
+import { runScript } from './script'
+import { prepareToBenchmarkFileOnDisk } from './utils/file'
+import { buildOperations, logAfterBenchmark, logBeforeBenchmark, logCompleteBenchmark, sleep } from './utils/helpers'
+import type { TDefaultSettings, TRuntimeSettings } from './utils/types'
 
 const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
   /**
@@ -70,7 +23,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
   const pathToLastSnapshotFile = await prepareToBenchmarkFileOnDisk(defaultSettings)
 
   for (let i = 0; i < operations.length; i++) {
-    const operation = operations[i]!
+    const operation = operations[i] as TRuntimeSettings
 
     logBeforeBenchmark(defaultSettings, operation, i, operations.length)
 
@@ -79,7 +32,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
 
     if (i !== (operations.length - 1)) {
       logAfterBenchmark(defaultSettings)
-      await sleep(defaultSettings?.delayBeforeRunning || 10)
+      await sleep(defaultSettings.delayBeforeRunning || 10)
     }
     else {
       logCompleteBenchmark()
@@ -87,7 +40,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
   }
 }
 
-start(
+void start(
   {
     defaultSettings: automateBenchmarkConfig.defaultSettings,
     operations: buildOperations(automateBenchmarkConfig.runtimeSettings),

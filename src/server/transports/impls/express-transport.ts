@@ -1,6 +1,8 @@
 import type { Server } from 'node:http'
+
 import type { Request, Response } from 'express'
 import express from 'express'
+
 import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
@@ -23,12 +25,13 @@ export class ExpressTransport<T extends ExpressContextProperties> extends Abstra
       ? await this.initBeforeServer([() => app.use(express.json())])
       : await this.initBeforeServer()
 
-    const handleRequest = this.mediator.buildHandleRequestWrapper(req => req.body)
+    const handleRequest = this.mediator.buildHandleRequestWrapper<Request, Response>(req => req.body)
 
     // @ts-expect-error impossible to describe types
+    // eslint-disable-next-line ts/no-unsafe-call
     app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (req: Request, res: Response) => {
       try {
-        const result = await handleRequest(req)
+        const result = await handleRequest({ req, res })
         res.json(result)
       }
       catch (err) {

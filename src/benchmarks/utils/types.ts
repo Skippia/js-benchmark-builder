@@ -17,8 +17,8 @@ type TBenchmarkSettingsProgrammatically = TBenchmarkSettingsCLI
   & Pick<TResultBenchmark, 'transport' | 'usecase'>
 
 type TResultBenchmark = {
-  transport: TTransportTypeUnion
-  usecase: TUsecaseTypeUnion
+  transport?: TTransportTypeUnion
+  usecase?: TUsecaseTypeUnion
   critical_errors: unknown
   errors: number
   timeouts: number
@@ -72,16 +72,16 @@ type TAutomateConfig = {
 
 export type {
   second,
-  TRuntimeSettings,
-  TFileInput,
-  TDefaultSettings,
-  TUsecaseConfig,
-  TBenchmarkSettingsCLI,
-  TBenchmarkSettingsProgrammatically,
-  TResultBenchmark,
-  TSnapshotOnDisk,
   TAllowedFlags,
   TAutomateConfig,
+  TBenchmarkSettingsCLI,
+  TBenchmarkSettingsProgrammatically,
+  TDefaultSettings,
+  TFileInput,
+  TResultBenchmark,
+  TRuntimeSettings,
+  TSnapshotOnDisk,
+  TUsecaseConfig,
 }
 
 export { ALLOWED_FLAGS }

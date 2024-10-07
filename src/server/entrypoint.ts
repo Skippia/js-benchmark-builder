@@ -1,6 +1,8 @@
 import { checkIsManualMode, getRuntimeSettings } from '../benchmarks/utils/helpers'
-import { type TTransportTypeUnion, type TUsecaseTypeUnion, transports, usecases } from './misc/types'
+
+import { configureCascadeMasterGracefulShutdown } from './misc/helpers'
 import { ServerProcessManager } from './misc/server-process-manager'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from './misc/types'
 
 /**
  * @returns Ready accept to requests child server process
@@ -29,12 +31,12 @@ const isManualMode = checkIsManualMode()
 if (isManualMode) {
   const { usecase, transport, cores } = getRuntimeSettings()
 
-  if (!usecases.includes(usecase) || !transports.includes(transport)) {
-    throw new Error('Transport or usecases was set incorrect way!')
-  }
-
-  startEntrypoint({ usecase, transport, cores })
+  void startEntrypoint({ usecase, transport, cores })
+    .then((currentChildProcessManager) => {
+    // Set graceful shutdown
+      configureCascadeMasterGracefulShutdown({ value: currentChildProcessManager })
+    })
 }
 
-// Export for benchmark
+// Export for automate mode
 export { startEntrypoint }

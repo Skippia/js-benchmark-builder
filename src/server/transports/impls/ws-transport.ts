@@ -1,5 +1,9 @@
+/* eslint-disable ts/no-unnecessary-condition */
 import { Buffer } from 'node:buffer'
-import { App, type HttpRequest, type HttpResponse, type TemplatedApp } from 'uWebSockets.js'
+
+import { App } from 'uWebSockets.js'
+import type { HttpRequest, HttpResponse, TemplatedApp } from 'uWebSockets.js'
+
 import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
@@ -23,7 +27,8 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
     // const handleRequest = this.mediator.buildHandleRequestWrapper(this.readJson)
 
     // @ts-expect-error impossible to describe types
-    app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (res: HttpResponse, _req: HttpRequest) => {
+    // eslint-disable-next-line ts/no-unsafe-call
+    app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (res: HttpResponse, req: HttpRequest) => {
       let aborted = false
 
       res.onAborted(() => {
@@ -32,7 +37,7 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
 
       try {
         // const result = await handleRequest(res)
-        const result = await this.mediator._handleRequest()
+        const result = await this.mediator._handleRequest({ req, res })
 
         if (!aborted) {
           res.cork(() => {
@@ -68,7 +73,7 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
     )
   }
 
-  async readJson(res: HttpResponse): Promise<unknown> {
+  readJson(res: HttpResponse): Promise<unknown> {
     let aborted = false
     let buffer: Buffer
 
@@ -89,6 +94,7 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
 
         try {
           // @ts-expect-error ...
+
           const json = buffer ? JSON.parse(Buffer.concat([buffer, chunk])) : JSON.parse(chunk)
           return resolve(json)
         }

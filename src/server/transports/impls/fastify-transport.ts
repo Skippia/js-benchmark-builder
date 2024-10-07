@@ -1,6 +1,8 @@
 import process from 'node:process'
-import type { FastifyInstance, RouteHandlerMethod } from 'fastify'
+
 import Fastify from 'fastify'
+import type { FastifyError, FastifyInstance, FastifyReply, FastifyRequest, RouteHandlerMethod } from 'fastify'
+
 import { AbstractTransport } from '../abstract-transport'
 import type { Mediator } from '../mediator'
 
@@ -23,7 +25,7 @@ export class FastifyTransport<T extends FastifyContextProperties> extends Abstra
 
     this.mediator.context.server = fastify
 
-    const handleRequest = this.mediator.buildHandleRequestWrapper(req => req.body)
+    const handleRequest = this.mediator.buildHandleRequestWrapper<FastifyRequest, FastifyReply>(req => req.body)
 
     if (this.mediator.targetMethod === 'POST') {
       fastify.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
@@ -32,15 +34,16 @@ export class FastifyTransport<T extends FastifyContextProperties> extends Abstra
           done(null, json)
         }
         catch (err) {
-          (err as any).statusCode = 500
-          done(err as Error, undefined)
+          (err as FastifyError).statusCode = 500
+          done(err as FastifyError, undefined)
         }
       })
     }
     // @ts-expect-error impossible to describe types
+    // eslint-disable-next-line ts/no-unsafe-call
     fastify[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, (async (req, reply) => {
       try {
-        const result = await handleRequest(req)
+        const result = await handleRequest({ req, res: reply })
         reply.send(result)
       }
       catch (err) {

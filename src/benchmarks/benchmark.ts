@@ -1,10 +1,15 @@
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
+
 import autocannon from 'autocannon'
-import { type TUsecaseTypeUnion, usecaseMap } from '../server/misc/types.js'
-import { type TBenchmarkSettingsCLI, type TBenchmarkSettingsProgrammatically, type TResultBenchmark, type TUsecaseConfig, getFlagValue } from './utils/index'
+
+import type { TUsecaseTypeUnion } from '../server/misc/types.js'
+import { usecaseMap } from '../server/misc/types.js'
+
 import { defaultBenchmarkConfig } from './benchmark-config.js'
+import { getFlagValue } from './utils/helpers.js'
+import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark, TUsecaseConfig } from './utils/types.js'
 
 const require = createRequire(import.meta.url)
 
@@ -12,6 +17,7 @@ function prepareRequests(usecaseConfig: TUsecaseConfig) {
   let requests = []
 
   if (usecaseConfig.method === 'POST') {
+    // eslint-disable-next-line import/no-dynamic-require, ts/no-unsafe-call
     requests = require(path.resolve('benchmarks-data/users.json')).map((user: unknown) => ({
       method: 'POST',
       path: usecaseConfig.path,
@@ -53,32 +59,30 @@ function startBenchmark(
         },
         requests,
       },
-      (err, res) => {
-        return resolve({
-          transport: transport as any,
-          usecase: usecase as any,
-          critical_errors: err,
-          errors: res.errors,
-          timeouts: res.timeouts,
-          latency: {
-            average: res.latency.average,
-            min: res.latency.min,
-            max: res.latency.max,
-            p75: res.latency.p75,
-            p90: res.latency.p90,
-            p99: res.latency.p99,
-          },
-          requests: {
-            totalAmount: res.requests.total,
-            average: res.requests.average,
-            min: res.requests.min,
-            max: res.requests.max,
-            p75: res.requests.p75,
-            p90: res.requests.p90,
-            p99: res.requests.p99,
-          },
-        })
-      },
+      (err, res) => resolve({
+        transport,
+        usecase,
+        critical_errors: err,
+        errors: res.errors,
+        timeouts: res.timeouts,
+        latency: {
+          average: res.latency.average,
+          min: res.latency.min,
+          max: res.latency.max,
+          p75: res.latency.p75,
+          p90: res.latency.p90,
+          p99: res.latency.p99,
+        },
+        requests: {
+          totalAmount: res.requests.total,
+          average: res.requests.average,
+          min: res.requests.min,
+          max: res.requests.max,
+          p75: res.requests.p75,
+          p90: res.requests.p90,
+          p99: res.requests.p99,
+        },
+      }),
     )
 
     autocannon.track(instance)
@@ -90,15 +94,15 @@ const isAutomateMode = getFlagValue('automate')
 
 if (!isAutomateMode) {
   const usecase = getFlagValue('u') as TUsecaseTypeUnion
-  const usecaseConfig = usecaseMap[usecase]!
+  const usecaseConfig = usecase in usecaseMap ? usecaseMap[usecase] : null
 
   if (!usecaseConfig) throw new Error('Usecase not found!')
 
-  startBenchmark({
-    connections: +(getFlagValue('c') || defaultBenchmarkConfig.connections),
-    pipelining: +(getFlagValue('p') || defaultBenchmarkConfig.pipelining),
-    workers: +(getFlagValue('w') || defaultBenchmarkConfig.workers),
-    duration: +(getFlagValue('d') || defaultBenchmarkConfig.duration),
+  void startBenchmark({
+    connections: Number(getFlagValue('c') || defaultBenchmarkConfig.connections),
+    pipelining: Number(getFlagValue('p') || defaultBenchmarkConfig.pipelining),
+    workers: Number(getFlagValue('w') || defaultBenchmarkConfig.workers),
+    duration: Number(getFlagValue('d') || defaultBenchmarkConfig.duration),
     usecaseConfig,
   })
 }

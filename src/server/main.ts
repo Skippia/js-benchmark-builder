@@ -1,13 +1,16 @@
 import cluster from 'node:cluster'
 import process from 'node:process'
-import { type TRuntimeSettings, getRuntimeSettings } from '../benchmarks/utils'
-import { buildTransport } from './transports'
+
+import { getRuntimeSettings } from '../benchmarks/utils/helpers'
+import type { TRuntimeSettings } from '../benchmarks/utils/types'
+
 import { configureCascadeChildGracefulShutdown } from './misc/helpers'
+import { buildTransport } from './transports'
 
 /**
  * @description this file will be run in child process
  */
-export async function buildServer(
+async function buildServer(
   { transport, usecase, cores }: TRuntimeSettings,
 ) {
   const port = Number(process.env.PORT || 3001)
@@ -36,8 +39,8 @@ export async function buildServer(
     })
   }
   else {
-    framework.run()
+    await framework.run()
   }
 }
 
-buildServer(getRuntimeSettings())
+void buildServer(getRuntimeSettings())

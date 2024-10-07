@@ -1,11 +1,11 @@
 import { createUser, pgPoolClient } from '../infra/pg.mjs'
-import type { TContext, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../misc/types'
 
 type PgPoolCreateUserContext
   = TContext & { createUser: ({ email, password }: { email: string, password: string }) => Promise<string> }
 
 export const hooks: THooks = {
-  async onInit(callbacks?: Function[]): Promise<PgPoolCreateUserContext> {
+  onInit(callbacks?: TFunction[]): PgPoolCreateUserContext {
     const context: PgPoolCreateUserContext = {
       createUser: createUser(pgPoolClient),
     }
@@ -23,7 +23,7 @@ export const hooks: THooks = {
   //   console.log('[Hook][onFinish]: Finishing response...')
   // },
 
-  async onClose(): Promise<void> {
+  onClose(): void {
     console.log('[Hook][onClose]: Close server...')
   },
 }
