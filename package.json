@@ -23,9 +23,16 @@
     "typecheck:watch": "tsc --noEmit --watch",
     "-------------------------------------------------": "",
     "build": "rm -rf dist && npx tsc --noEmit false && tsc-alias",
-    "build:watch": "concurrently \"npx tsc -w --noEmit false\" \"tsc-alias -w\""
+    "build:watch": "concurrently \"npx tsc -w --noEmit false\" \"tsc-alias -w\"",
+    "--------------------------------------------------": "",
+    "graph:deps:generate:v1": "npx depcruise src --include-only '^src' --output-type dot | dot -T svg > ./docs/dependency-graph-v1.svg",
+    "graph:deps:generate:v2": "npx depcruise src --include-only '^src' --progress  --config .dependency-cruiser.cjs --output-type dot | dot -T svg -Grankdir=TD | tee docs/dependency-graph-v2.svg | node node_modules/dependency-cruiser/bin/wrap-stream-in-html.mjs > docs/dependency-graph-v2.html",
+    "graph:deps:generate:top-level": "npx depcruise src --include-only '^src' --config .dependency-cruiser.cjs --output-type ddot | dot -T svg -Grankdir=TD | tee docs/dependency-graph-top-level.svg | node node_modules/dependency-cruiser/bin/wrap-stream-in-html.mjs > docs/dependency-graph-top-level.html",
+    "graph:deps:generate:all": "npm run graph:deps:generate:v1 && npm run graph:deps:generate:v2 && npm run graph:deps:generate:top-level",
+    "graph:deps:check": "npx depcruise src"
   },
   "dependencies": {
+    "autocannon": "^7.15.0",
     "express": "^4.19.2",
     "fastify": "^4.28.1",
     "ioredis": "^5.4.1",
@@ -38,8 +45,8 @@
     "@types/bun": "^1.1.8",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.4",
-    "autocannon": "^7.15.0",
     "concurrently": "^9.0.1",
+    "dependency-cruiser": "^16.4.2",
     "eslint": "^9.9.1",
     "globals": "^15.9.0",
     "tsc-alias": "^1.8.10",
