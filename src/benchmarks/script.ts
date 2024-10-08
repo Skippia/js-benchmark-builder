@@ -1,10 +1,11 @@
-import { startEntrypoint } from '../server/entrypoint'
-import type { ServerProcessManager } from '../server/misc/server-process-manager'
-import { usecaseMap } from '../server/misc/types'
+import { startEntrypoint } from '../server'
+import type { ServerProcessManager } from '../server/utils/server-process-manager'
+import { usecaseMap } from '../server/utils/types'
+import type { TRuntimeSettings } from '../server/utils/types'
 
 import { startBenchmark } from './benchmark'
 import { updateBenchmarkInfo } from './utils/file'
-import type { TDefaultSettings, TRuntimeSettings } from './utils/types'
+import type { TDefaultSettings } from './utils/types'
 
 export const runScript = async (
   defaultSettings: TDefaultSettings,
@@ -15,11 +16,13 @@ export const runScript = async (
   // Track down if child process was killed
   const childProcessWasClosed = new Promise<void>((resolve) => {
     if (currentChildProcessManagerRef.value === null) {
+      console.log('mda unexpected')
       resolve()
       return
     }
 
     currentChildProcessManagerRef.value.on('close', (_code) => {
+      console.log('unexpected')
       resolve()
     })
   })
@@ -49,5 +52,5 @@ export const runScript = async (
   currentChildProcessManagerRef.value.stop('SIGTERM')
 
   // 5. Server process was terminated
-  await childProcessWasClosed
+  return await childProcessWasClosed
 }

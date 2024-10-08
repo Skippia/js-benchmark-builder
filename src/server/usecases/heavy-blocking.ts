@@ -1,4 +1,4 @@
-import type { TContext, TFunction, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../utils/types'
 
 function heavyBlockingTask() {
   let sum = 0

@@ -1,15 +1,10 @@
 import cluster from 'node:cluster'
 import process from 'node:process'
 
-import { getRuntimeSettings } from '../benchmarks/utils/helpers'
-import type { TRuntimeSettings } from '../benchmarks/utils/types'
-
-import { configureCascadeChildGracefulShutdown } from './misc/helpers'
 import { buildTransport } from './transports'
+import { configureCascadeChildGracefulShutdown, getRuntimeSettings } from './utils/helpers'
+import type { TRuntimeSettings } from './utils/types'
 
-/**
- * @description this file will be run in child process
- */
 async function buildServer(
   { transport, usecase, cores }: TRuntimeSettings,
 ) {

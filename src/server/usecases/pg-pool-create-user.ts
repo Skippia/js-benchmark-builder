@@ -1,5 +1,5 @@
 import { createUser, pgPoolClient } from '../infra/pg.mjs'
-import type { TContext, TFunction, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../utils/types'
 
 type PgPoolCreateUserContext
   = TContext & { createUser: ({ email, password }: { email: string, password: string }) => Promise<string> }

@@ -4,8 +4,8 @@ import process from 'node:process'
 
 import autocannon from 'autocannon'
 
-import type { TUsecaseTypeUnion } from '../server/misc/types.js'
-import { usecaseMap } from '../server/misc/types.js'
+import type { TUsecaseTypeUnion } from '../server/utils/types.js'
+import { usecaseMap } from '../server/utils/types.js'
 
 import { defaultBenchmarkConfig } from './benchmark-config.js'
 import { getFlagValue } from './utils/helpers.js'

@@ -246,7 +246,8 @@ export default antfu(
             ['external'], // npm modules (f.e lodash)
             ['internal'], // custom path alias (f.e @shared)
             ['parent'],
-            ['sibling', 'index'],
+            ['sibling'],
+            ['index'],
           ],
           'pathGroups': [
             //

@@ -1,5 +1,5 @@
 import { createUser, getUser, redis } from '../infra/redis.mjs'
-import type { TContext, TFunction, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../utils/types'
 
 type RedisGetUserContext
   = TContext & { getUser: () => Promise<({ email: string, password: string } | null)> }

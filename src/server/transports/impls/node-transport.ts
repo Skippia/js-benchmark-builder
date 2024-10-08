@@ -38,17 +38,18 @@ export class NodeTransport<T extends NodeContextProperties> extends AbstractTran
       }
     })
 
+    this.gracefulShutdown(() => new Promise<void>((resolve, reject) => {
+      this.mediator.context.server.close((err) => {
+        if (!err) {
+          return resolve()
+        }
+        reject(err)
+      })
+    }))
+
     this.mediator.context.server.listen(this.port, () => {
       console.log(`Node server running on http://localhost:${this.port}`)
     })
-
-    this.gracefulShutdown(() => new Promise<void>((resolve) => {
-      this.mediator.context.server.close((err) => {
-        if (!err) {
-          resolve()
-        }
-      })
-    }))
   }
 
   getRequestBody(req: IncomingMessage) {

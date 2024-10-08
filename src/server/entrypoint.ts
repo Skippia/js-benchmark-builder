@@ -1,8 +1,8 @@
-import { checkIsManualMode, getRuntimeSettings } from '../benchmarks/utils/helpers'
+import { checkIsManualMode } from '../benchmarks/utils/helpers'
 
-import { configureCascadeMasterGracefulShutdown } from './misc/helpers'
-import { ServerProcessManager } from './misc/server-process-manager'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from './misc/types'
+import { configureCascadeMasterGracefulShutdown, getRuntimeSettings } from './utils/helpers'
+import { ServerProcessManager } from './utils/server-process-manager'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from './utils/types'
 
 /**
  * @returns Ready accept to requests child server process

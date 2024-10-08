@@ -1,19 +1,17 @@
-/* eslint-disable ts/no-shadow */
-import { cpus } from 'node:os'
 import process from 'node:process'
 
-import { transports, usecases } from '../../server/misc/types'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/misc/types'
+import { transports, usecases } from '../../server/utils/types'
+import type { TRuntimeSettings, TTransportTypeUnion, TUsecaseTypeUnion } from '../../server/utils/types'
 
 import { ALLOWED_FLAGS } from './types'
-import type { second, TAllowedFlags, TAutomateConfig, TDefaultSettings, TRuntimeSettings } from './types'
+import type { second, TAllowedFlags, TDefaultSettings } from './types'
 
 const isPositiveNumeric = (value: string | undefined | null) => (value !== null && typeof value !== 'undefined') ? /^\d+$/.test(value) : false
 const isTransport = (val: unknown): val is TTransportTypeUnion => transports.includes(val as TTransportTypeUnion)
 const isUsecase = (val: unknown): val is TUsecaseTypeUnion => usecases.includes(val as TUsecaseTypeUnion)
 const checkIsManualMode = () => getFlagValue('automate') === 'manual-mode'
 
-const sleep = (ms: second) => new Promise((resolve) => {
+const sleep = (ms: second) => new Promise<void>((resolve) => {
   setTimeout(resolve, ms * 1000)
 })
 
@@ -43,38 +41,9 @@ const getFlagValue = (flag: TAllowedFlags): TTransportTypeUnion | TUsecaseTypeUn
   return isPositiveNumeric(foundVal) ? Number(foundVal) : foundVal as TTransportTypeUnion | TUsecaseTypeUnion | 'max'
 }
 
-const convertCLICoresOptionToRealCores = (cores: number | 'max' | undefined): number =>
-  cores === 'max'
-    ? cpus().length
-    : typeof cores === 'undefined'
-      ? 1
-      : Number(cores)
-
-const getRuntimeSettings = (): TRuntimeSettings => ({
-  transport: getFlagValue('t') as TTransportTypeUnion,
-  usecase: getFlagValue('u') as TUsecaseTypeUnion,
-  cores: convertCLICoresOptionToRealCores(getFlagValue('cores') as number | 'max' | undefined),
-})
-
-const buildOperations = ({
-  usecases,
-  transports,
-  cores,
-}: TAutomateConfig['runtimeSettings']) => usecases.flatMap(usecase =>
-  transports.flatMap(transport =>
-    cores.map(_cores => ({
-      transport,
-      usecase,
-      cores: convertCLICoresOptionToRealCores(_cores),
-    }) satisfies TRuntimeSettings),
-  ),
-)
-
 export {
-  buildOperations,
   checkIsManualMode,
   getFlagValue,
-  getRuntimeSettings,
   isPositiveNumeric,
   logAfterBenchmark,
   logBeforeBenchmark,

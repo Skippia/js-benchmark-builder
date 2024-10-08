@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import type { TContext, TFunction } from '../misc/types'
+import type { TContext, TFunction } from '../utils/types'
 
 import type { Mediator } from './mediator'
 
@@ -25,35 +25,29 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
   gracefulShutdown(closeServerCallback: () => Promise<void> | void, callbacks?: TFunction[]) {
     console.log('[Hook]:', 'Configurate graceful shutdown...')
 
-    process.on('SIGINT', () => {
+    // eslint-disable-next-line ts/no-misused-promises
+    process.on('SIGINT', async () => {
       // ('ctrl + c')
       console.log('[Hook][Child]: intercept SIGINT')
 
-      this.mediator.runHook('onClose', {})
-        .then(() => {
-          callbacks?.forEach(c => c())
-          return closeServerCallback()
-        })
-        .then(() => {
-          console.log('[Hook][Child]: terminate process with code', 0)
-          process.exit(0)
-        })
-        .catch((err) => { throw err })
+      await this.mediator.runHook('onClose', {})
+      callbacks?.forEach(c => c())
+      await closeServerCallback()
+
+      console.log('[Hook][Child]: terminate process with code', 0)
+      process.exit(0)
     })
 
-    process.on('SIGTERM', () => {
-      console.log('[Hook][Child]: intercept SIGTERM')
+    // eslint-disable-next-line ts/no-misused-promises
+    process.on('SIGTERM', async () => {
+      console.log('(3) [Hook][Child]: intercept SIGTERM')
 
-      this.mediator.runHook('onClose', {})
-        .then(() => {
-          callbacks?.forEach(c => c())
-          return closeServerCallback()
-        })
-        .then(() => {
-          console.log('[Hook][Child]: terminate process with code', 1)
-          process.exit(1)
-        })
-        .catch((err) => { throw err })
+      await this.mediator.runHook('onClose', {})
+      callbacks?.forEach(c => c())
+      await closeServerCallback()
+
+      console.log('(5) [Hook][Child]: terminate process with code', 1)
+      process.exit(1)
     })
   }
 

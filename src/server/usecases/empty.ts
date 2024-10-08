@@ -1,4 +1,4 @@
-import type { TContext, TFunction, THooks } from '../misc/types'
+import type { TContext, TFunction, THooks } from '../utils/types'
 
 export const hooks: THooks = {
   onInit(callbacks?: TFunction[]): TContext {

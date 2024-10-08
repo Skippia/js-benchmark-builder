@@ -48,6 +48,15 @@ type TUsecaseConfig<T extends string = string> = { method: 'GET' | 'POST', path:
 type TUsecaseTypeUnion = typeof usecases[number]
 type TTransportTypeUnion = typeof transports[number]
 
+/**
+ * @description Config which we can get parsing CLI flags
+ */
+type TRuntimeSettings = {
+  transport: TTransportTypeUnion
+  usecase: TUsecaseTypeUnion
+  cores: number
+}
+
 type THostEnvironment = 'bun' | 'node'
 
 type TContext<T extends Record<string, unknown> = {}> = Record<string, unknown> & T
@@ -83,6 +92,7 @@ export type {
   THostEnvironment,
   TMediatorProperties,
   TRunFn,
+  TRuntimeSettings,
   TTransportTypeUnion,
   TUsecaseBuilder,
   TUsecaseConfig,

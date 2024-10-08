@@ -1,5 +1,5 @@
-import { usecaseMap } from '../misc/types'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../misc/types'
+import { usecaseMap } from '../utils/types'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../utils/types'
 
 import type { AbstractTransport } from './abstract-transport'
 import type { BunTransport } from './impls/bun-transport'

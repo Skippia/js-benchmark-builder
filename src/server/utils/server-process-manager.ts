@@ -65,14 +65,10 @@ export class ServerProcessManager {
    */
   stop(signal: NodeJS.Signals) {
     if (this.isRunning) {
-      (this.childProcess as ChildProcessWithoutNullStreams).on('close', (_code) => {
-        this.childProcess = null
-      })
-
       const pid = (this.childProcess as ChildProcessWithoutNullStreams).pid
-      console.log(`Kill child process with pid=${pid}`)
+      console.log(`(1) Kill child process with pid=${pid}`)
       // Kill this process
-      if (typeof pid === 'number') process.kill(pid, signal)
+      process.kill(pid as number, signal)
     }
     else {
       console.log('No child process to stop.')

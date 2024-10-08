@@ -1,9 +1,9 @@
-import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/misc/types'
+import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/utils/types'
 
 type second = number
 
 type TDefaultSettings = {
-  delayBeforeRunning?: second
+  delayBeforeRunning: second
   connections: number
   pipelining: number
   workers: number
@@ -41,15 +41,6 @@ type TResultBenchmark = {
   }
 }
 
-/**
- * @description Config which we can get parsing CLI flags
- */
-type TRuntimeSettings = {
-  transport: TTransportTypeUnion
-  usecase: TUsecaseTypeUnion
-  cores: number
-}
-
 type TSnapshotOnDisk = {
   benchmarkConfig: TDefaultSettings
   benchmarks: TResultBenchmark[]
@@ -79,7 +70,6 @@ export type {
   TDefaultSettings,
   TFileInput,
   TResultBenchmark,
-  TRuntimeSettings,
   TSnapshotOnDisk,
   TUsecaseConfig,
 }
