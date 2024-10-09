@@ -43,7 +43,7 @@ export const configureCascadeChildGracefulShutdown = () => {
 
   signals.forEach((signal) => {
     process.on(signal, () => {
-      console.log(`(2) Master process of server received ${signal}. Sending ${signal} to all workers (amount = ${(Object.keys(cluster.workers || ({} as NodeJS.Dict<Worker>))).length}). `)
+      console.log(`Master process of server received ${signal}. Sending ${signal} to all workers (amount = ${(Object.keys(cluster.workers || ({} as NodeJS.Dict<Worker>))).length}). `)
 
       // Send SIGINT to all workers
       for (const id in cluster.workers) {

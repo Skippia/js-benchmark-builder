@@ -22,6 +22,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
 
   // Write info about default settings related with benchmark
   const pathToLastSnapshotFile = await prepareToBenchmarkFileOnDisk(defaultSettings)
+
   for (let i = 0; i < operations.length; i++) {
     const operation = operations[i] as TRuntimeSettings
 
@@ -40,8 +41,7 @@ const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaul
   }
 }
 
-// eslint-disable-next-line ts/no-floating-promises
-start(
+void start(
   {
     defaultSettings: automateBenchmarkConfig.defaultSettings,
     operations: buildOperations(automateBenchmarkConfig.runtimeSettings),

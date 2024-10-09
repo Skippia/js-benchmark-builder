@@ -40,13 +40,13 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
 
     // eslint-disable-next-line ts/no-misused-promises
     process.on('SIGTERM', async () => {
-      console.log('(3) [Hook][Child]: intercept SIGTERM')
+      console.log('[Hook][Child]: intercept SIGTERM')
 
       await this.mediator.runHook('onClose', {})
       callbacks?.forEach(c => c())
       await closeServerCallback()
 
-      console.log('(5) [Hook][Child]: terminate process with code', 1)
+      console.log('[Hook][Child]: terminate process with code', 1)
       process.exit(1)
     })
   }

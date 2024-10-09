@@ -12,26 +12,18 @@ export const runScript = async (
   operation: TRuntimeSettings,
   pathToLastSnapshotFile: string,
   currentChildProcessManagerRef: { value: ServerProcessManager | null },
+
 ): Promise<void> => {
-  // Track down if child process was killed
-  const childProcessWasClosed = new Promise<void>((resolve) => {
-    if (currentChildProcessManagerRef.value === null) {
-      console.log('mda unexpected')
-      resolve()
-      return
-    }
-
-    currentChildProcessManagerRef.value.on('close', (_code) => {
-      console.log('unexpected')
-      resolve()
-    })
-  })
-
   // 1. Run server & and hold reference to the actual child process
   currentChildProcessManagerRef.value = await startEntrypoint({
     cores: operation.cores,
     transport: operation.transport,
     usecase: operation.usecase,
+  })
+
+  // Track down if child process was killed
+  const childProcessWasClosed = new Promise<void>((resolve) => {
+    currentChildProcessManagerRef.value?.on('close', _code => resolve())
   })
 
   // 2. Run benchmark & collect data
@@ -52,5 +44,5 @@ export const runScript = async (
   currentChildProcessManagerRef.value.stop('SIGTERM')
 
   // 5. Server process was terminated
-  return await childProcessWasClosed
+  await childProcessWasClosed
 }
