@@ -1,11 +1,10 @@
 import { startEntrypoint } from '../server'
 import type { ServerProcessManager } from '../server/utils/server-process-manager'
 import { usecaseMap } from '../server/utils/types'
-import type { TRuntimeSettings } from '../server/utils/types'
+import type { TDefaultSettings, TRuntimeSettings } from '../server/utils/types'
 
 import { startBenchmark } from './benchmark'
 import { updateBenchmarkInfo } from './utils/file'
-import type { TDefaultSettings } from './utils/types'
 
 export const runScript = async (
   defaultSettings: TDefaultSettings,

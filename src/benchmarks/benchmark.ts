@@ -4,12 +4,12 @@ import process from 'node:process'
 
 import autocannon from 'autocannon'
 
-import type { TUsecaseTypeUnion } from '../server/utils/types.js'
-import { usecaseMap } from '../server/utils/types.js'
+import { getFlagValue } from '../server/utils/helpers'
+import type { TUsecaseTypeUnion } from '../server/utils/types'
+import { usecaseMap } from '../server/utils/types'
 
-import { defaultBenchmarkConfig } from './benchmark-config.js'
-import { getFlagValue } from './utils/helpers.js'
-import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark, TUsecaseConfig } from './utils/types.js'
+import { defaultBenchmarkConfig } from './benchmark-config'
+import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark, TUsecaseConfig } from './utils/types'
 
 const require = createRequire(import.meta.url)
 

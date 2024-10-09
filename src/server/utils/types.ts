@@ -43,7 +43,7 @@ const usecaseMap: { [K in TUsecaseTypeUnion]: TUsecaseConfig<K> } = {
     path: '/redis-get-user',
   },
 } as const
-
+type second = number
 type TUsecaseConfig<T extends string = string> = { method: 'GET' | 'POST', path: `/${T}` }
 type TUsecaseTypeUnion = typeof usecases[number]
 type TTransportTypeUnion = typeof transports[number]
@@ -55,6 +55,23 @@ type TRuntimeSettings = {
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
   cores: number
+}
+
+type TDefaultSettings = {
+  delayBeforeRunning: second
+  connections: number
+  pipelining: number
+  workers: number
+  duration: second
+}
+
+type TAutomateConfig = {
+  defaultSettings: Required<TDefaultSettings>
+  runtimeSettings: {
+    usecases: readonly TUsecaseTypeUnion[]
+    transports: readonly TTransportTypeUnion[]
+    cores: ('max' | number)[]
+  }
 }
 
 type THostEnvironment = 'bun' | 'node'
@@ -84,9 +101,17 @@ type TMediatorProperties = {
   run: TRunFn
 }
 
-export { transports, usecaseMap, usecases }
+const ALLOWED_FLAGS = ['u', 't', 'c', 'p', 'w', 'd', 'automate', 'cores'] as const
+
+type TAllowedFlags = typeof ALLOWED_FLAGS[number]
+
+export { ALLOWED_FLAGS, transports, usecaseMap, usecases }
 export type {
+  second,
+  TAllowedFlags,
+  TAutomateConfig,
   TContext,
+  TDefaultSettings,
   TFunction,
   THooks,
   THostEnvironment,

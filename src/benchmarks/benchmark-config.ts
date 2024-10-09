@@ -1,6 +1,5 @@
 import { transports, usecases } from '../server/utils/types'
-
-import type { TAutomateConfig } from './utils/types'
+import type { TAutomateConfig } from '../server/utils/types'
 
 export const defaultBenchmarkConfig: TAutomateConfig['defaultSettings'] = {
   workers: 3,

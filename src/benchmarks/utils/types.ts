@@ -1,14 +1,4 @@
-import type { TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/utils/types'
-
-type second = number
-
-type TDefaultSettings = {
-  delayBeforeRunning: second
-  connections: number
-  pipelining: number
-  workers: number
-  duration: second
-}
+import type { TDefaultSettings, TTransportTypeUnion, TUsecaseConfig, TUsecaseTypeUnion } from '../../server/utils/types'
 
 type TBenchmarkSettingsCLI = Omit<TDefaultSettings, 'cores' | 'delayBeforeRunning'>
   & { usecaseConfig: TUsecaseConfig } & Partial<Pick<TResultBenchmark, 'transport' | 'usecase'>>
@@ -48,30 +38,11 @@ type TSnapshotOnDisk = {
 
 type TFileInput = { pathToStorage: string, fileContent: Partial<TSnapshotOnDisk> }
 
-const ALLOWED_FLAGS = ['u', 't', 'c', 'p', 'w', 'd', 'automate', 'cores'] as const
-
-type TAllowedFlags = typeof ALLOWED_FLAGS[number]
-
-type TAutomateConfig = {
-  defaultSettings: Required<TDefaultSettings>
-  runtimeSettings: {
-    usecases: readonly TUsecaseTypeUnion[]
-    transports: readonly TTransportTypeUnion[]
-    cores: ('max' | number)[]
-  }
-}
-
 export type {
-  second,
-  TAllowedFlags,
-  TAutomateConfig,
   TBenchmarkSettingsCLI,
   TBenchmarkSettingsProgrammatically,
-  TDefaultSettings,
   TFileInput,
   TResultBenchmark,
   TSnapshotOnDisk,
   TUsecaseConfig,
 }
-
-export { ALLOWED_FLAGS }
