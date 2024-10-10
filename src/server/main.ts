@@ -7,9 +7,9 @@ import type { TRuntimeSettings } from '@shared/types'
 import { buildTransport } from './transports'
 import { configureCascadeChildGracefulShutdown } from './utils/helpers'
 
-async function buildServer(
+const buildServer = async (
   { transport, usecase, cores }: TRuntimeSettings,
-) {
+) => {
   const port = Number(process.env.PORT || 3001)
 
   const framework = await buildTransport(

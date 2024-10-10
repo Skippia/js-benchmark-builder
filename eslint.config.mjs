@@ -8,6 +8,7 @@ export default antfu(
     stylistic: {
       indent: 2,
       quotes: 'single',
+      // ''
     },
   },
 
@@ -111,7 +112,7 @@ export default antfu(
       'ts/prefer-optional-chain': 'error',
       'ts/prefer-readonly': 'off',
       'ts/prefer-readonly-parameter-types': 'off',
-      'ts/prefer-reduce-type-parameter': 'error',
+      'ts/prefer-reduce-type-parameter': 'off',
       'ts/prefer-regexp-exec': 'off',
       'ts/prefer-return-this-type': 'error',
       'ts/prefer-string-starts-ends-with': 'error',
@@ -173,6 +174,7 @@ export default antfu(
       'ts/no-duplicate-imports': 'off', // Superseded by `import/no-duplicates`
     },
   },
+  // ?----------------------------------------------------
   {
     files: ['**/*.js', '**/*.mjs', '**/*.ts'],
     languageOptions: {
@@ -198,7 +200,7 @@ export default antfu(
       'no-unused-vars': ['off'],
       'antfu/if-newline': ['off'],
       'antfu/top-level-function': ['off'],
-
+      'style/max-len': ['error', { code: 120, comments: 80, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreUrls: true }],
       // ! -------------------Import section-------------------
       'perfectionist/sort-imports': ['off'],
       'import/no-unresolved': 'off', // TODO: blocked by https://github.com/import-js/eslint-plugin-import/issues/2170

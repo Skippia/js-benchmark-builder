@@ -11,21 +11,19 @@ type TRuntimeSettings = {
   cores: number
 }
 
-type TDefaultSettings = {
-  delayBeforeRunning: second
-  connections: number
-  pipelining: number
-  workers: number
-  duration: second
-}
-
 type THostEnvironment = 'bun' | 'node'
+
+type TInvert<T extends Record<string, string>> = {
+  [key in T[keyof T]]: {
+    [keyInner in keyof T]: T[keyInner] extends key ? keyInner : never
+  }[keyof T]
+}
 
 export type {
   second,
   TAllowedFlags,
-  TDefaultSettings,
   THostEnvironment,
+  TInvert,
   TRuntimeSettings,
   TTransportTypeUnion,
   TUsecaseConfig,

@@ -1,11 +1,13 @@
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from './constants'
-import { checkIsManualMode, configureCascadeMasterGracefulShutdown, getRuntimeSettings } from './helpers'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from '@shared/constants'
+import { getRuntimeSettings } from '@shared/helpers'
+
 import { ServerProcessManager } from './server-process-manager'
+import { checkIsManualMode, configureCascadeMasterGracefulShutdown } from './utils/helpers'
 
 /**
  * @returns Ready accept to requests child server process
  */
-async function startEntrypoint({
+const startEntrypoint = async ({
   transport,
   usecase,
   cores,
@@ -13,7 +15,7 @@ async function startEntrypoint({
   transport: TTransportTypeUnion
   usecase: TUsecaseTypeUnion
   cores: number
-}): Promise<ServerProcessManager> {
+}): Promise<ServerProcessManager> => {
   // 1. Create wrapper around process instance (still empty)
   const childProcessManager = new ServerProcessManager(transport, usecase, cores)
 
