@@ -5,7 +5,7 @@ import process from 'node:process'
 
 import type { THostEnvironment, TTransportTypeUnion, TUsecaseTypeUnion } from './types'
 
-export class ServerProcessManager {
+class ServerProcessManager {
   childProcess: ChildProcessWithoutNullStreams | null = null
   private readonly hostEnvironment: THostEnvironment
 
@@ -79,3 +79,5 @@ export class ServerProcessManager {
     this.childProcess?.on(args[0].toString(), args[1])
   }
 }
+
+export { ServerProcessManager }

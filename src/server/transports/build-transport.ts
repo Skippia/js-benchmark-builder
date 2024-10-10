@@ -1,5 +1,5 @@
-import { usecaseMap } from '../utils/types'
-import type { TTransportTypeUnion, TUsecaseTypeUnion } from '../utils/types'
+import { USECASE_MAP } from '@shared/constants'
+import type { TTransportTypeUnion, TUsecaseTypeUnion } from '@shared/types'
 
 import type { AbstractTransport } from './abstract-transport'
 import type { BunTransport } from './impls/bun-transport'
@@ -34,7 +34,7 @@ export async function buildTransport(config: { transport: TTransportTypeUnion, u
 
   const { hooks, run } = await import(`../usecases/${usecase}.js`)
 
-  const usecaseConfig = usecaseMap[usecase]
+  const usecaseConfig = USECASE_MAP[usecase]
 
   const TransportImpl = await transportMap[transport]() as TAbstractTransportConstructor
 

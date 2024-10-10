@@ -1,4 +1,6 @@
-import type { TContext, TFunction, THooks, TMediatorProperties, TRunFn, TTransportTypeUnion } from '../utils/types'
+import type { TTransportTypeUnion } from '@shared/types'
+
+import type { TContext, TFunction, THooks, TMediatorProperties, TRunFn } from '../utils/types'
 
 export class Mediator<T extends Record<string, unknown>> implements TMediatorProperties {
   transport: TTransportTypeUnion

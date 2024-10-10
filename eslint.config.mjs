@@ -257,11 +257,6 @@ export default antfu(
               position: 'before',
             },
 
-            {
-              pattern: '@libs/**',
-              group: 'internal',
-              position: 'before',
-            },
           ],
           'pathGroupsExcludedImportTypes': ['internal'],
           'newlines-between': 'always',

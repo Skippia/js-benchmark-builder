@@ -4,12 +4,12 @@ import process from 'node:process'
 
 import autocannon from 'autocannon'
 
-import { getFlagValue } from '../server/utils/helpers'
-import type { TUsecaseTypeUnion } from '../server/utils/types'
-import { usecaseMap } from '../server/utils/types'
+import { USECASE_MAP } from '@shared/constants'
+import { getFlagValue } from '@shared/helpers'
+import type { TUsecaseConfig, TUsecaseTypeUnion } from '@shared/types'
 
 import { defaultBenchmarkConfig } from './benchmark-config'
-import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark, TUsecaseConfig } from './utils/types'
+import type { TBenchmarkSettingsCLI, TBenchmarkSettingsProgrammatically, TResultBenchmark } from './utils/types'
 
 const require = createRequire(import.meta.url)
 
@@ -94,7 +94,7 @@ const isAutomateMode = getFlagValue('automate')
 
 if (!isAutomateMode) {
   const usecase = getFlagValue('u') as TUsecaseTypeUnion
-  const usecaseConfig = usecase in usecaseMap ? usecaseMap[usecase] : null
+  const usecaseConfig = usecase in USECASE_MAP ? USECASE_MAP[usecase] : null
 
   if (!usecaseConfig) throw new Error('Usecase not found!')
 

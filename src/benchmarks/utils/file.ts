@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import type { TDefaultSettings } from '../../server/utils/types'
+import type { TDefaultSettings } from '@shared/types'
 
 import type { TFileInput, TResultBenchmark, TSnapshotOnDisk } from './types'
 

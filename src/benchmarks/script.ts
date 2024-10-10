@@ -1,7 +1,8 @@
-import { startEntrypoint } from '../server'
-import type { ServerProcessManager } from '../server/utils/server-process-manager'
-import { usecaseMap } from '../server/utils/types'
-import type { TDefaultSettings, TRuntimeSettings } from '../server/utils/types'
+import { USECASE_MAP } from '@shared/constants'
+import { startEntrypoint } from '@shared/entrypoint'
+import type { TDefaultSettings, TRuntimeSettings } from '@shared/types'
+
+import type { ServerProcessManager } from '../shared/server-process-manager'
 
 import { startBenchmark } from './benchmark'
 import { updateBenchmarkInfo } from './utils/file'
@@ -31,7 +32,7 @@ export const runScript = async (
     pipelining: defaultSettings.pipelining,
     workers: defaultSettings.workers,
     duration: defaultSettings.duration,
-    usecaseConfig: usecaseMap[operation.usecase],
+    usecaseConfig: USECASE_MAP[operation.usecase],
     transport: operation.transport,
     usecase: operation.usecase,
   })

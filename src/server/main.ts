@@ -1,9 +1,11 @@
 import cluster from 'node:cluster'
 import process from 'node:process'
 
+import { getRuntimeSettings } from '@shared/helpers'
+import type { TRuntimeSettings } from '@shared/types'
+
 import { buildTransport } from './transports'
-import { configureCascadeChildGracefulShutdown, getRuntimeSettings } from './utils/helpers'
-import type { TRuntimeSettings } from './utils/types'
+import { configureCascadeChildGracefulShutdown } from './utils/helpers'
 
 async function buildServer(
   { transport, usecase, cores }: TRuntimeSettings,
