@@ -42,7 +42,8 @@ const prepareRequests = (usecaseConfig: TUsecaseConfig) => {
 }
 
 const startBenchmark = (
-  { connections, duration, pipelining, usecaseConfig, workers, transport, usecase }: TBenchmarkSettingsCLI | TBenchmarkSettingsProgrammatically,
+  { connections, duration, pipelining, usecaseConfig, workers, transport, usecase }:
+  TBenchmarkSettingsCLI | TBenchmarkSettingsProgrammatically,
 ): Promise<TResultBenchmark> => new Promise((resolve) => {
   const port = process.env.PORT
   const url = `http://localhost:${port}`

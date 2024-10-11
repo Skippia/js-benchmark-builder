@@ -200,8 +200,7 @@ export default antfu(
       'no-unused-vars': ['off'],
       'antfu/if-newline': ['off'],
       'antfu/top-level-function': ['off'],
-      'style/max-len': ['error', { code: 120, comments: 80, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreUrls: true }],
-      // ! -------------------Import section-------------------
+      'style/max-len': ['error', { code: 120, comments: 120, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreUrls: true }],
       'perfectionist/sort-imports': ['off'],
       'import/no-unresolved': 'off', // TODO: blocked by https://github.com/import-js/eslint-plugin-import/issues/2170
       'import/named': 'error',

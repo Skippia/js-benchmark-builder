@@ -7,7 +7,8 @@ import { prepareToBenchmarkFileOnDisk } from './utils/file'
 import { buildOperations, configureCascadeMasterGracefulShutdown, logAfterBenchmark, logBeforeBenchmark, logCompleteBenchmark, sleep } from './utils/helpers'
 import type { TDefaultSettings } from './utils/types'
 
-const start = async ({ defaultSettings, operations }: { defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
+const start = async ({ defaultSettings, operations }:
+{ defaultSettings: TDefaultSettings, operations: TRuntimeSettings[] }) => {
   /**
    * @description Graceful shutdown callback some way must
    * hold reference to the actual child process.

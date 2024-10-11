@@ -27,7 +27,7 @@ export class WsTransport<T extends WsContextProperties> extends AbstractTranspor
     // const handleRequest = this.mediator.buildHandleRequestWrapper(this.readJson)
 
     // @ts-expect-error impossible to describe types
-    // eslint-disable-next-line ts/no-unsafe-call
+    // eslint-disable-next-line ts/no-unsafe-call, style/max-len
     app[this.mediator.targetMethod.toLowerCase()](this.mediator.targetPath, async (res: HttpResponse, req: HttpRequest) => {
       let aborted = false
 

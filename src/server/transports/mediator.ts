@@ -64,8 +64,10 @@ export class Mediator<T extends Record<string, unknown>> implements TMediatorPro
     return result
   }
 
-  // eslint-disable-next-line ts/no-redundant-type-constituents
-  buildHandleRequestWrapper<TTransportRequest, TTransportResponse>(getBody: (req: TTransportRequest) => (Promise<unknown> | unknown)) {
+  buildHandleRequestWrapper<TTransportRequest, TTransportResponse>(
+    // eslint-disable-next-line ts/no-redundant-type-constituents
+    getBody: (req: TTransportRequest) => (Promise<unknown> | unknown),
+  ) {
     return this.targetMethod === 'POST'
       ? async ({ req, res }: {
         req: TTransportRequest

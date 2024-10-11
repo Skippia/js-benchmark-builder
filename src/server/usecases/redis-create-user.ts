@@ -2,7 +2,9 @@ import { createNewUser, redis } from '../infra/redis.mjs'
 import type { TContext, TFunction, THooks } from '../utils/types'
 
 type RedisCreateUserContext
-  = TContext & { createNewUser: ({ email, password }: { email: string, password: string }) => Promise<{ email: string, password: string }> }
+  = TContext &
+  { createNewUser: ({ email, password }: { email: string, password: string }) =>
+  Promise<{ email: string, password: string }> }
 
 export const hooks: THooks = {
   onInit(callbacks?: TFunction[]): RedisCreateUserContext {

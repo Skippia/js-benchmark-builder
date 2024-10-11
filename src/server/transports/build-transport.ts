@@ -29,7 +29,8 @@ const transportMap: TTransportMap = {
   ws: () => import('./impls/ws-transport').then(i => i.WsTransport),
 }
 
-export const buildTransport = async (config: { transport: TTransportTypeUnion, usecase: TUsecaseTypeUnion, port: number }): Promise<AbstractTransport> => {
+export const buildTransport = async (config:
+{ transport: TTransportTypeUnion, usecase: TUsecaseTypeUnion, port: number }): Promise<AbstractTransport> => {
   const { transport, usecase, port } = config
 
   const { hooks, run } = await import(`../usecases/${usecase}.js`)

@@ -8,7 +8,8 @@ import type { TAllowedFlags, TInvert, TRuntimeSettings, TTransportTypeUnion, TUs
 const isPositiveNumeric = (value: string | undefined | null) => (value !== null && typeof value !== 'undefined') ? /^\d+$/.test(value) : false
 const isTransport = (val: unknown): val is TTransportTypeUnion => TRANSPORTS.includes(val as TTransportTypeUnion)
 const isUsecase = (val: unknown): val is TUsecaseTypeUnion => USECASES.includes(val as TUsecaseTypeUnion)
-const isNotRequiredFlag = (val: unknown): val is typeof NOT_REQUIRED_FLAGS[number] => NOT_REQUIRED_FLAGS.includes(val as typeof NOT_REQUIRED_FLAGS[number])
+const isNotRequiredFlag = (val: unknown): val is typeof NOT_REQUIRED_FLAGS[number] =>
+  NOT_REQUIRED_FLAGS.includes(val as typeof NOT_REQUIRED_FLAGS[number])
 const isAllowFlag = (val: unknown): val is TAllowedFlags => ALLOWED_FLAGS.includes(val as TAllowedFlags)
 
 const convertCLICoresOptionToRealCores = (cores: number | 'max' | undefined): number =>
@@ -18,7 +19,8 @@ const convertCLICoresOptionToRealCores = (cores: number | 'max' | undefined): nu
       ? 1
       : Number(cores)
 
-const keysTransformer = <T extends Record<string, unknown>, X extends { [key in keyof T]: string }>(objSource: T, mapKeys: X) =>
+const keysTransformer
+= <T extends Record<string, unknown>, X extends { [key in keyof T]: string }>(objSource: T, mapKeys: X) =>
   Object.entries(objSource).reduce((acc, cur) => {
     const [key, value] = cur as [keyof T, T[keyof T]]
     const newKey = mapKeys[key]
