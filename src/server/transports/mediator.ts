@@ -1,6 +1,6 @@
 import type { TTransportTypeUnion } from '@shared/types'
 
-import type { TContext, TFunction, THooks, TMediatorProperties, TRunFn } from '../utils/types'
+import type { TContext, THookOptions, THooks, TMediatorProperties, TRunFn } from '../utils/types'
 
 export class Mediator<T extends Record<string, unknown>> implements TMediatorProperties {
   transport: TTransportTypeUnion
@@ -21,29 +21,30 @@ export class Mediator<T extends Record<string, unknown>> implements TMediatorPro
     this.context = {} as T
   }
 
+  hooksMap<TTransportRequest, TTransportResponse>(
+    hook: THooks[keyof THooks],
+    options?: THookOptions<TTransportRequest, TTransportResponse>,
+  ) {
+    return {
+      onInit: () => (hook as Required<THooks>['onInit'])() as Promise<TContext<T>>,
+      onRequest: () => (hook as Required<THooks>['onRequest'])(options?.req),
+      onFinish: () => (hook as Required<THooks>['onFinish'])(options?.res),
+      onClose: () => (hook as THooks['onClose'])(),
+    } satisfies Record<keyof THooks, unknown>
+  }
+
   async runHook<TTransportRequest, TTransportResponse>(
     hookName: keyof THooks,
-    options: { req?: TTransportRequest, res?: TTransportResponse, callbacks?: TFunction[] },
+    options?: THookOptions<TTransportRequest, TTransportResponse>,
   ): Promise<void | TContext<T>> {
+    // Hook exists
     const hook = this.hooks[hookName]
-    const { req, res, callbacks } = options
 
     if (!hook) return
 
-    if (hookName === 'onInit') {
-      return await (hook as Required<THooks>['onInit'])(callbacks) as TContext<T>
-    }
-    else if (hookName === 'onRequest') {
-      await (hook as Required<THooks>['onRequest'])(req)
-    }
-    else if (hookName === 'onFinish') {
-      await (hook as Required<THooks>['onFinish'])(res)
-    }
+    if (hookName === 'onInit') return await this.hooksMap(hook, options)[hookName]()
 
-    // eslint-disable-next-line ts/no-unnecessary-condition
-    else if (hookName === 'onClose') {
-      await (hook as THooks['onClose'])()
-    }
+    await this.hooksMap(hook, options)[hookName]()
   }
 
   async _handleRequest<TTransportRequest, TTransportResponse>(

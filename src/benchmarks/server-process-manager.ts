@@ -42,7 +42,7 @@ class ServerProcessManager {
       this.childProcess.stdout.on('data', (data: Buffer) => {
         const stdoutInfo = data.toString()
 
-        if (!stdoutInfo.startsWith('[Hook]')) console.log(stdoutInfo)
+        /* if (!stdoutInfo.startsWith('[Hook]')) */ console.log(stdoutInfo)
 
         if (stdoutInfo.includes('server running on')) {
           resolve(this.childProcess as ChildProcessWithoutNullStreams)

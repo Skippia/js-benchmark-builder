@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import type { TContext, TFunction } from '../utils/types'
+import type { TAsyncFunction, TContext, TSyncFunction } from '../utils/types'
 
 import type { Mediator } from './mediator'
 
@@ -11,10 +11,14 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
    * @description Initialize context, run callbacks
    * before HTTP server will be initialized.
    */
-  async initBeforeServer(callbacks?: TFunction[]): Promise<TContext<T>> {
-    return (await this.mediator.runHook('onInit', { callbacks: [() => {
-      console.log(`[${this.mediator.transport}] expects [${this.mediator.targetMethod}]: ${this.mediator.targetPath}`)
-    }, ...(callbacks || [])] })) as TContext<T>
+  async initBeforeServer(callbacks?: (TAsyncFunction | TSyncFunction)[]): Promise<TContext<T>> {
+    console.log(`[${this.mediator.transport}] expects [${this.mediator.targetMethod}]: ${this.mediator.targetPath}`)
+
+    for (const callback of (callbacks || [])) {
+      await callback()
+    }
+
+    return (await this.mediator.runHook('onInit')) as TContext<T>
   }
 
   /**
@@ -22,32 +26,26 @@ export abstract class AbstractTransport<T extends Record<string, unknown> = {}> 
    * f.e close sockets, connections etc.
    * After it HTTP server will be stopped.
    */
-  gracefulShutdown(closeServerCallback: () => Promise<void> | void, callbacks?: TFunction[]) {
+  gracefulShutdown(closeServerCallback: () => Promise<void> | void, callbacks?: (TAsyncFunction | TSyncFunction)[]) {
     console.log('[Hook]:', 'Configurate graceful shutdown...')
 
-    // eslint-disable-next-line ts/no-misused-promises
-    process.on('SIGINT', async () => {
-      // ('ctrl + c')
-      console.log('[Hook][Child]: intercept SIGINT')
+    ;(['SIGINT', 'SIGTERM'] as const).forEach((signal: NodeJS.Signals) => {
+      const exitCode = signal === 'SIGTERM' ? 1 : 0
+      // eslint-disable-next-line ts/no-misused-promises
+      process.on(signal, async () => {
+        console.log(`[Hook][Child]: intercept ${signal}`)
 
-      await this.mediator.runHook('onClose', {})
-      callbacks?.forEach(c => c())
-      await closeServerCallback()
+        await this.mediator.runHook('onClose')
 
-      console.log('[Hook][Child]: terminate process with code', 0)
-      process.exit(0)
-    })
+        for (const callback of (callbacks || [])) {
+          await callback()
+        }
 
-    // eslint-disable-next-line ts/no-misused-promises
-    process.on('SIGTERM', async () => {
-      console.log('[Hook][Child]: intercept SIGTERM')
+        await closeServerCallback()
 
-      await this.mediator.runHook('onClose', {})
-      callbacks?.forEach(c => c())
-      await closeServerCallback()
-
-      console.log('[Hook][Child]: terminate process with code', 1)
-      process.exit(1)
+        console.log('[Hook][Child]: terminate process with code', exitCode)
+        process.exit(exitCode)
+      })
     })
   }
 

@@ -42,9 +42,7 @@ const buildOperations = ({
  * @description GS for parent process
  */
 const configureCascadeMasterGracefulShutdown = (childProcessManagerRef: { value: ServerProcessManager | null }) => {
-  const signals = ['SIGINT', 'SIGTERM'] as const
-
-  signals.forEach((signal) => {
+  ;(['SIGINT', 'SIGTERM'] as const).forEach((signal: NodeJS.Signals) => {
     process.on(signal, () => {
       const exitCode = signal === 'SIGTERM' ? 1 : 0
 

@@ -1,8 +1,9 @@
 import { USECASE_MAP } from '@shared/constants'
 import type { TRuntimeSettings } from '@shared/types'
 
+import { startEntrypoint } from '../server/entrypoint'
+
 import { startBenchmark } from './benchmark'
-import { startEntrypoint } from './entrypoint'
 import type { ServerProcessManager } from './server-process-manager'
 import { updateBenchmarkInfo } from './utils/file'
 import type { TDefaultSettings } from './utils/types'

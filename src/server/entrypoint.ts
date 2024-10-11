@@ -1,8 +1,8 @@
 import type { TTransportTypeUnion, TUsecaseTypeUnion } from '@shared/constants'
 import { getRuntimeSettings } from '@shared/helpers'
 
-import { ServerProcessManager } from './server-process-manager'
-import { checkIsManualMode, configureCascadeMasterGracefulShutdown } from './utils/helpers'
+import { ServerProcessManager } from '../benchmarks/server-process-manager'
+import { checkIsManualMode, configureCascadeMasterGracefulShutdown } from '../benchmarks/utils/helpers'
 
 /**
  * @returns Ready accept to requests child server process
